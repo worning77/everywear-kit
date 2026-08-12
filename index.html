@@ -158,6 +158,10 @@
 
 <!-- ============ STEP 1 · TUTORIAL ============ -->
 <section class="step" id="s1">
+  <h2>What this study is</h2>
+  <div class="script"><span class="say">say first, before any definitions</span><br>
+  We built a map of embodied AR interaction: ways of interacting where the body itself is the input. The map has two axes, and it is colored by what camera-free sensors on everyday devices, glasses, a watch, a phone, can deliver. Today we want to know whether this map works for someone like you: whether its categories are clearly separated, whether anything you know is missing from it, and whether you can design new things with it. The four tasks test exactly that. One unit matters all day: the map classifies <b>interaction techniques</b>, one input act and what it does. It does not classify applications; an app is built from many techniques, and each technique gets its own cell.</div>
+
   <h2>The space, in two questions</h2>
   <p>We organize embodied AR interaction by two questions about any technique.</p>
 
@@ -175,9 +179,9 @@
     <div class="axis">
       <h3>2 · Commitment: how much geometry does it hold?</h3>
       <ul>
-        <li><b>Trigger</b> — a discrete event fires something (nod, tap, posture change, zone entry)</li>
-        <li><b>Track</b> — continuous motion maps to continuous output (pointing, dragging, rep counting)</li>
-        <li><b>Anchor</b> — content is placed in the frame and must persist there over time and movement</li>
+        <li><b>Trigger</b> — a discrete moment fires something (nod, tap, posture change, zone entry); the commitment ends the moment it fires</li>
+        <li><b>Track</b> — continuous motion maps to continuous output while you act (pointing, dragging, rep counting)</li>
+        <li><b>Anchor</b> — content is placed in the frame and must persist there: still in place after you look away, leave, and come back</li>
       </ul>
     </div>
   </div>
@@ -187,7 +191,7 @@
     <li><b>Binding, not device.</b> A ring, watch, or camera is a sensor, not a frame: a pinch detected by a ring and the same pinch detected by a camera are both +Arm.</li>
     <li><b>Outermost frame.</b> Pick the outermost frame the content genuinely recruits. Pointing your arm at a world target binds to the world (+Scene); tapping your own forearm binds to the arm (+Arm).</li>
     <li><b>+Social means another person is essential:</b> content binds to their body frame (a health bar above your opponent) or to a frame shared between users (a screen two people must see at the same place, at the same time). Content left in the world for others to find later, a Pokémon&nbsp;Go gym, needs no frame with a particular person: that is +Scene.</li>
-    <li><b>Primary commitment.</b> Many techniques are composites (a track substrate with a trigger commit). Classify by what the user's act does to the content.</li>
+    <li><b>Primary commitment.</b> Many techniques are composites (a track substrate with a trigger commit). Code by the defining act: the thing the technique exists to do. A palm menu summoned with a tap: the menu is transient scaffolding, the tap that commits a choice defines it → trigger. A label stuck to a machine that must still be there tomorrow: the sticking gesture fires once, the persistence defines it → anchor.</li>
     <li><b>Ego-position.</b> The head frame also carries the body's own place in the world: a walked trajectory, content pinned where you stood. Head-orientation content is drift-free; ego-position content rides the frontier.</li>
   </ul>
 
@@ -213,7 +217,7 @@
 <section class="step" id="s3">
   <h2>Task 1 · Classify ten techniques <span style="color:var(--muted);font-size:16px">(12 min)</span></h2>
   <div class="script"><span class="say">read aloud</span><br>
-  I will show you ten short descriptions of published AR/VR interaction techniques, one at a time. For each, click the cell it belongs to on the grid below, and say your reasoning out loud. There are no trick questions; if a card feels like it fits two cells, tick the box and pick both, that is data for us.</div>
+  I will show you ten short descriptions of published AR/VR interaction techniques, one at a time. Each card is one technique: a single input act and what it does, not a whole application. Classify what the card describes, not an app it could live in. For each, click the cell it belongs to on the grid below, and say your reasoning out loud. There are no trick questions. If a card genuinely fits two cells, tick the box and pick a second; your first pick should be the single best fit. If you see more than two, tell me which and why, I will note it, the grid records your best two.</div>
 
   <div class="subnav">
     <button onclick="card(-1)">◀ prev card</button>
@@ -328,6 +332,7 @@
   <div class="subnav">
     <select id="t4req" style="font-size:14px;padding:6px 8px;border:1px solid var(--faint);border-radius:8px;background:var(--panel);color:var(--ink)"></select>
     <input type="text" id="t4name" placeholder="the interaction, one line">
+    <input type="text" id="t4why" placeholder="their reason, one line (fill for any fix-expecting cell or mismatch)">
   </div>
   <div class="pickgrid" id="t4grid"></div>
   <div class="subnav">
@@ -339,7 +344,7 @@
   <div id="t4list"></div>
   <div class="fac" id="t4log"></div>
 
-  <div class="fac"><b>Probe intent.</b> A is solvable almost entirely in blue: does the expert keep it blue? B forces purple: do they spend the fix sparingly and put the list somewhere blue? Ideas beyond the brief's four needs are welcome: tag them "extra idea" and score them the same way. The ✓/✗ in the log compares the expert's fix call against the clicked cell's own coloring (blue = no fix; +Scene/+Social and Head track/anchor = fix); a mismatch is the moment to probe, not to correct.</div>
+  <div class="fac"><b>Probe intent.</b> A is solvable almost entirely in blue: does the expert keep it blue? B forces purple: do they spend the fix sparingly and put the list somewhere blue? Ideas beyond the brief's four needs are welcome: tag them "extra idea" and score them the same way. The ✓/✗ in the log compares the expert's fix call against the clicked cell's own coloring (blue = no fix; +Scene/+Social and Head track/anchor = fix); a mismatch is the moment to probe, not to correct. Watch for content placed on a scene surface (a mirror, a shelf) with no fix spent; probe once: how does the system know where that surface is? Whenever the picked cell expects a fix, and on every mismatch, type the expert's reason into the reason box in their words; the audio carries the full version.</div>
 
   <div class="fac"><b>T4 scoring sheet — check each proposed interaction against the measured feasibility table (paper Table 1, final verdicts):</b>
   <table>
@@ -621,8 +626,9 @@ function addT4(){
   if (!v) { document.getElementById('t4state').textContent = '← type the interaction first'; return; }
   if (!t4sel) { document.getElementById('t4state').textContent = 'click the cell it lives in'; return; }
   t4.items.push({ n:v, r:+document.getElementById('t4req').value, c:t4sel,
-                  fix: document.getElementById('t4fix').checked });
-  inp.value=''; t4sel=null; document.getElementById('t4fix').checked=false;
+                  fix: document.getElementById('t4fix').checked,
+                  why: document.getElementById('t4why').value.trim() || null });
+  inp.value=''; document.getElementById('t4why').value=''; t4sel=null; document.getElementById('t4fix').checked=false;
   localStorage.setItem('ewar_t4', JSON.stringify(t4)); updateT4Grid(); renderT4();
 }
 function rmT4(i){ t4.items.splice(i,1); localStorage.setItem('ewar_t4', JSON.stringify(t4)); renderT4(); }
@@ -630,7 +636,7 @@ function renderT4(){
   const list = document.getElementById('t4list'); if (!list) return;
   const B = t4.brief;
   list.innerHTML = t4.items.map((x,i)=>
-    `<div class="placed">${i+1}. [${B?REQS[B][x.r]:'?'}] <b>${x.n}</b> → ${cellName(x.c)}${x.fix?' · spends fix':''} <button onclick="rmT4(${i})" title="remove">✕</button></div>`).join('');
+    `<div class="placed">${i+1}. [${B?REQS[B][x.r]:'?'}] <b>${x.n}</b> → ${cellName(x.c)}${x.fix?' · spends fix':''}${x.why?' · “'+x.why+'”':''} <button onclick="rmT4(${i})" title="remove">✕</button></div>`).join('');
   const log = document.getElementById('t4log'); if (!log) return;
   if (!t4.items.length) { log.innerHTML = '<b>T4 log:</b> nothing recorded yet.'; return; }
   const rows = t4.items.map((x,i)=>{
@@ -664,7 +670,7 @@ function exportSession(){
     t2: { placements: t2.pl.map(p=>({name:p.n, cell:cellName(p.c)})), boundaries: t2.bd.map(b=>b.n) },
     t3: t3.map((x,i)=>({idx:i+1, prompt:PROMPTTAG[x.p], label:x.n})),
     t4: { brief: t4.brief, items: t4.items.map(x=>({need: t4.brief?REQS[t4.brief][x.r]:null,
-          interaction:x.n, cell:cellName(x.c), expertFix:x.fix, cellExpectsFix:needsFix(x.c)})) },
+          interaction:x.n, cell:cellName(x.c), expertFix:x.fix, cellExpectsFix:needsFix(x.c), why:x.why||null})) },
   };
   const id = (data.demographics.id || 'X').replace(/\W+/g,'');
   const day = data.exported.slice(0,10);
