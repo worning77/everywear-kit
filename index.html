@@ -133,7 +133,7 @@
   <span id="pills"></span>
   <span class="spacer"></span>
   <span id="clock" title="click to start/pause">00:00</span>
-  <span class="pill" id="facbtn" title="toggle facilitator layer (or press F, or open with #fac)">◐ facilitator</span>
+  <span class="pill" id="facbtn" title="toggle facilitator layer (or press Cmd+F / Ctrl+F, or open with #fac)">◐ facilitator</span>
 </div>
 
 <div class="wrap">
@@ -141,7 +141,7 @@
 <!-- ============ STEP 0 · WELCOME ============ -->
 <section class="step" id="s0">
   <h1>EveryweAR — Expert Session</h1>
-  <p class="sans" style="color:var(--muted);font-size:14px">Kit v2 · 2026-08-04 · this page is the screen-share surface for the whole session. Participant-facing text is ready to read aloud; the orange facilitator layer stays hidden unless toggled (press F, or open a private window with <code>#fac</code>).</p>
+  <p class="sans" style="color:var(--muted);font-size:14px">Kit v2 · 2026-08-04 · this page is the screen-share surface for the whole session. Participant-facing text is ready to read aloud; the orange facilitator layer stays hidden unless toggled (press Cmd+F / Ctrl+F, or open a private window with <code>#fac</code>).</p>
 
   <div class="script"><span class="say">read aloud</span><br>
   Thank you for joining. Over the next 75 minutes you will review a design framework for AR interaction: first a short tutorial, then four small tasks. You will classify a few published techniques, tell us what the framework misses, design with it, and sketch an application. There are no right answers we are hiding; where you disagree with the framework is exactly the data we want. We record audio and this screen. Any questions before we start?</div>
@@ -694,7 +694,10 @@ function clearSession(){
 function setFac(on){ document.body.classList.toggle('fac-on', on); }
 document.getElementById('facbtn').onclick = ()=>setFac(!document.body.classList.contains('fac-on'));
 document.addEventListener('keydown', e=>{
-  if(e.key==='f'||e.key==='F') setFac(!document.body.classList.contains('fac-on'));
+  if((e.metaKey||e.ctrlKey) && (e.key==='f'||e.key==='F')){
+    e.preventDefault();
+    setFac(!document.body.classList.contains('fac-on'));
+  }
   if(e.key==='Escape') lb.classList.remove('show');
 });
 if (location.hash.includes('fac')) setFac(true);
