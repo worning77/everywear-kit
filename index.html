@@ -309,7 +309,7 @@
 
 <!-- ============ STEP 3 · 1b REDO WITH THE SPACE ============ -->
 <section class="step" id="s3">
-  <h2>Part 2 · Your design, with the grid <span style="color:var(--muted);font-size:16px">(15 min)</span></h2>
+  <h2>Part 2 · Your design, with the grid <span style="color:var(--muted);font-size:16px">(12 min)</span></h2>
   <div class="script"><span class="say">read aloud</span><br>
   Here are your five answers from before, with the grid beside them. For each one: click the cell where the interaction lives, pick whether it needs no fix, an occasional fix, or a setup or scan, and type whether you would now change the design, and why. An interaction may pass through more than one cell, for example content pinned to a machine that you then copy to your wrist: click the cells in the order they happen, and click a cell again to remove it. The grid shows the color of what you picked; nothing here is marked right or wrong.</div>
 
@@ -334,7 +334,7 @@
 
 <!-- ============ STEP 4 · DEMOS ============ -->
 <section class="step" id="s4">
-  <h2>What we built <span style="color:var(--muted);font-size:16px">(8 min)</span></h2>
+  <h2>What we built <span style="color:var(--muted);font-size:16px">(6 min)</span></h2>
   <div class="script"><span class="say">read aloud</span><br>
   Five applications, all running live on glasses, watch, and phone, no camera during use. Each caption names the cells it occupies. After each one, tick whether it is something you would have thought of. At the end, type what is missing from this set.</div>
   <div id="demolist"></div>
@@ -343,9 +343,37 @@
   <div class="fac"><b>Timing (measured):</b> navigator 21 s · gaming 11 s · context-aware 31 s · teleparty 37 s · pace-partner 31 s ≈ 2.2 min of video. Narrate over each using its caption line. Tick "I would have thought of this" only when the expert says so unprompted or when asked directly; do not lead.</div>
 </section>
 
-<!-- ============ STEP 5 · FRONTIER CRITIQUE ============ -->
+<!-- ============ STEP 5 · FREE APPLICATION DESIGN ============ -->
 <section class="step" id="s5">
-  <h2>The coloring <span style="color:var(--muted);font-size:16px">(17 min)</span></h2>
+  <h2>Part 3 · An application of your own <span style="color:var(--muted);font-size:16px">(8 min)</span></h2>
+  <div class="script"><span class="say">read aloud</span><br>
+  Same hardware: glasses with an inertial unit, no camera and no eye tracker during use, watch and phone optional, one setup step allowed. Pick an application from your own domain. Name it, then list three to five interactions. For each: type what the user does, click the cell or cells it passes through, and pick the fix call. Think aloud while you build.</div>
+
+  <div class="qa"><div class="q">Application name and domain</div>
+    <input id="fr_name" oninput="saveFreeMeta()" placeholder="e.g. museum guide for families" style="width:100%"></div>
+
+  <img class="grid-fig" src="everyweAR-Material/design-space-recolor.png" alt="The EveryweAR design space grid, five frames by three commitments, colored by the inertial frontier">
+  <div class="subnav"><span class="cardmeta">Type the interaction, click its cells in order (click again to remove), pick the fix call, then add it.</span></div>
+  <textarea id="fr_item" placeholder="what the user does and what the content is"></textarea>
+  <div class="pickgrid small" id="freegrid"></div>
+  <div class="subnav">
+    <span class="cardmeta" id="freestate">no cell yet</span>
+    <span class="radios" style="margin-left:12px">
+      <label><input type="radio" name="frcall" value="none"> none</label>
+      <label><input type="radio" name="frcall" value="occasional"> occasional fix</label>
+      <label><input type="radio" name="frcall" value="setup"> setup or scan</label>
+    </span>
+    <span class="spacer"></span>
+    <button class="primary" onclick="addFree()">add interaction</button>
+  </div>
+  <table class="rowtable" id="freetable"></table>
+
+  <div class="fac"><b>Ask, do not suggest:</b> "what has to be known for that to work?" once per interaction if the cell and the fix call disagree; take the answer down in the why box. Aim for 3 to 5 interactions; stop at 8 minutes.</div>
+</section>
+
+<!-- ============ STEP 6 · FRONTIER CRITIQUE ============ -->
+<section class="step" id="s6">
+  <h2>The coloring <span style="color:var(--muted);font-size:16px">(15 min)</span></h2>
   <div class="script"><span class="say">read aloud</span><br>
   Now the grid on its own. Click any cell whose color you disagree with and type why. Be specific about what would have to be sensed.</div>
   <img class="grid-fig" src="everyweAR-Material/design-space-recolor.png" alt="The EveryweAR design space grid, five frames by three commitments, colored by the inertial frontier">
@@ -373,7 +401,7 @@
 </section>
 
 <!-- ============ STEP 6 · CLOSING ============ -->
-<section class="step" id="s6">
+<section class="step" id="s7">
   <h2>Closing <span style="color:var(--muted);font-size:16px">(5 min)</span></h2>
   <div class="script"><span class="say">ask</span><br>
   If you started an AR project tomorrow with this hardware, what from today would you carry into it? What would you ignore?</div>
@@ -396,7 +424,7 @@
 
 <script>
 /* ---------- constants ---------- */
-const STEPS = ["Intro","1a Design","Tutorial","1b Redo","Demos","Critique","Closing"];
+const STEPS = ["Intro","1a Design","Tutorial","1b Redo","Demos","Your app","Critique","Closing"];
 const FRAMES = ['Head','+Arm','+Body','+Scene','+Social'];
 const COMMITS = ['Trigger','Track','Anchor'];
 const NEEDS = {
@@ -429,7 +457,7 @@ const DEMOS = [
 const K = {
   demo:'ewar3_demo', brief:'ewar3_brief', before:'ewar3_before', after:'ewar3_after',
   afterRefl:'ewar3_afterReflection', demos:'ewar3_demos', crit:'ewar3_critique',
-  closing:'ewar3_closing', misc:'ewar3_misc'
+  closing:'ewar3_closing', misc:'ewar3_misc', free:'ewar3_free'
 };
 function load(k, d){ try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch(e){ return d; } }
 function save(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} }
@@ -442,6 +470,7 @@ let afterRefl = load(K.afterRefl, {unprompted:'', likert:null});
 let demos = load(K.demos, {thoughtOf:[], missing:''});
 let crit = load(K.crit, {cells:[], noPlace:'', mostUseful:'', leastUseful:'', rename:''});
 let closing = load(K.closing, {carry:'', ignore:''});
+let free = load(K.free, {name:'', items:[]});   // items: [{interaction, cells:[[f,c]], call, why}]
 let misc = load(K.misc, {warmfix:''});
 
 function blankBefore(){ return [0,1,2,3,4].map(()=>({act:'', where:'', beyond:''})); }
@@ -473,7 +502,7 @@ function buildGridInto(id, pref, fn){
   });
   g.innerHTML = h;
 }
-function buildGrid(){ buildGridInto('redogrid','rk','pickRedo'); buildGridInto('critgrid','ck','pickCrit'); }
+function buildGrid(){ buildGridInto('redogrid','rk','pickRedo'); buildGridInto('critgrid','ck','pickCrit'); buildGridInto('freegrid','fk','pickFree'); }
 function markGridMany(pref, sels){
   FRAMES.forEach((f,fi)=>COMMITS.forEach((cm,c)=>{
     const el = document.getElementById(`${pref}${fi}_${c}`); if(!el) return;
@@ -622,6 +651,37 @@ function toggleThought(k, on){
 }
 function saveDemos(){ demos.missing = document.getElementById('demo_missing').value; save(K.demos, demos); }
 
+/* ---------- free application design ---------- */
+let freeSel = [];
+function pickFree(f,c){ const i = freeSel.findIndex(x=>x[0]===f&&x[1]===c); if(i>=0) freeSel.splice(i,1); else freeSel.push([f,c]);
+  markGridMany('fk', freeSel); document.getElementById('freestate').textContent = freeSel.length ? chainName(freeSel) : 'no cell yet'; }
+function saveFreeMeta(){ free.name = document.getElementById('fr_name').value; save(K.free, free); }
+function addFree(){
+  const txt = document.getElementById('fr_item').value.trim();
+  const call = (document.querySelector('input[name="frcall"]:checked')||{}).value || '';
+  if (!txt) { document.getElementById('freestate').textContent = 'type the interaction first'; return; }
+  if (!freeSel.length) { document.getElementById('freestate').textContent = 'click at least one cell'; return; }
+  free.items.push({interaction:txt, cells:freeSel.slice(), call, why:''});
+  freeSel = []; markGridMany('fk', []); document.getElementById('fr_item').value = '';
+  document.querySelectorAll('input[name="frcall"]').forEach(r=>r.checked=false);
+  document.getElementById('freestate').textContent = 'no cell yet';
+  save(K.free, free); renderFree();
+}
+function setFree(i,k,v){ free.items[i][k] = v; save(K.free, free); }
+function rmFree(i){ free.items.splice(i,1); save(K.free, free); renderFree(); }
+function renderFree(){
+  const nm = document.getElementById('fr_name'); if (nm) nm.value = free.name || '';
+  const t = document.getElementById('freetable'); if (!t) return;
+  if (!free.items.length) { t.innerHTML = ''; return; }
+  t.innerHTML = '<tr><th style="width:34%">Interaction</th><th>Cells</th><th style="width:12%">Fix call</th><th>Why (if asked)</th><th></th></tr>' +
+    free.items.map((x,i)=>`<tr>
+      <td class="need">${i+1} · ${esc(x.interaction)}</td>
+      <td><span class="swatch ${chainColor(x.cells)?'sw-'+chainColor(x.cells):'sw-none'}"></span>${chainName(x.cells)}</td>
+      <td>${esc(x.call)}</td>
+      <td><textarea oninput="setFree(${i},'why',this.value)">${esc(x.why)}</textarea></td>
+      <td><button class="rm" onclick="rmFree(${i})" title="remove">✕</button></td></tr>`).join('');
+}
+
 /* ---------- critique ---------- */
 let critSel = null;
 function pickCrit(f,c){ critSel = [f,c]; markGrid('ck', critSel);
@@ -665,6 +725,7 @@ function exportSession(){
       expected: chainExpected(after[i].cells) || '', changed: !!after[i].changed, why: after[i].why||'' })),
     afterReflection: { unprompted: afterRefl.unprompted||'', likert: afterRefl.likert||null },
     demos: { thoughtOf: demos.thoughtOf.slice(), missing: demos.missing||'' },
+    freeDesign: { name: free.name||'', items: free.items.map(x=>({interaction:x.interaction, cells:x.cells.map(cellName), call:x.call||'', expected: chainExpected(x.cells)||'', why:x.why||''})) },
     critique: { cells: crit.cells.map(c=>({cell:c.cell, objection:c.objection||'', quantity:c.quantity||''})),
       noPlace: crit.noPlace||'', mostUseful: crit.mostUseful||'', leastUseful: crit.leastUseful||'', rename: crit.rename||'' },
     closing: { carry: closing.carry||'', ignore: closing.ignore||'' }
@@ -682,11 +743,11 @@ function exportSession(){
   else { ta.select(); try { copied = document.execCommand('copy'); } catch(e) {} document.getElementById('exportstate').textContent = copied ? 'downloaded + copied to clipboard' : 'downloaded; copy the JSON below by hand'; }
 }
 function clearSession(){
-  if (!confirm('Clear ALL session data (demographics, 1a, 1b, demos, critique, closing)? Export first!')) return;
+  if (!confirm('Clear ALL session data (demographics, 1a, 1b, demos, your app, critique, closing)? Export first!')) return;
   Object.values(K).forEach(k=>{ try { localStorage.removeItem(k); } catch(e){} });
   demo = {}; brief = null; before = blankBefore(); after = blankAfter();
   afterRefl = {unprompted:'', likert:null}; demos = {thoughtOf:[], missing:''};
-  crit = {cells:[], noPlace:'', mostUseful:'', leastUseful:'', rename:''}; closing = {carry:'', ignore:''}; misc = {warmfix:''};
+  crit = {cells:[], noPlace:'', mostUseful:'', leastUseful:'', rename:''}; closing = {carry:'', ignore:''}; misc = {warmfix:''}; free = {name:'', items:[]}; freeSel = [];
   redoRow = 0; critSel = null; tp = 0;
   DFIELDS.forEach(k => { const el = document.getElementById(k); if (el) el.value = ''; });
   document.getElementById('sessjson').style.display = 'none'; document.getElementById('exportstate').textContent = '';
@@ -710,8 +771,9 @@ function render() {
   if (cur===2) { tpage(tp); document.getElementById('warmfix').value = misc.warmfix || ''; }
   if (cur===3) { renderRedo(); renderLikert(); }
   if (cur===4) renderDemos();
-  if (cur===5) { markGrid('ck', critSel); renderCrit(); loadCritOpen(); }
-  if (cur===6) loadClosing();
+  if (cur===5) { markGridMany('fk', freeSel); renderFree(); }
+  if (cur===6) { markGrid('ck', critSel); renderCrit(); loadCritOpen(); }
+  if (cur===7) loadClosing();
 }
 function go(i){ cur=i; render(); }
 
