@@ -106,6 +106,9 @@
   .sw-gradient { background:linear-gradient(90deg, var(--blue), var(--purple)); }
   .sw-none { background:transparent; border-style:dashed; }
 
+  .card { background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:12px 14px; font-size:15px; line-height:1.45; }
+  .cardhead { font-weight:700; margin-bottom:4px; }
+  .cardrow td { padding-top:0 !important; }
   /* row tables (1a facilitator table, 1b redo table, critique) */
   .rowtable { width:100%; border-collapse:collapse; font-size:14.5px; margin:10px 0; }
   .rowtable th { text-align:left; color:var(--muted); font-weight:650; font-size:12.5px;
@@ -375,7 +378,7 @@
 <section class="step" id="s6">
   <h2>The coloring <span style="color:var(--muted);font-size:16px">(15 min)</span></h2>
   <div class="script"><span class="say">read aloud</span><br>
-  Now the grid on its own. Click any cell whose color you disagree with and type why. Be specific about what would have to be sensed.</div>
+  Now the grid on its own. Click any cell whose color you disagree with and type why. Be specific about what would have to be sensed. Once your objections are down, we will open our measurements for those cells, and you tell us whether they settle it.</div>
   <img class="grid-fig" src="everyweAR-Material/design-space-recolor.png" alt="The EveryweAR design space grid, five frames by three commitments, colored by the inertial frontier">
 
   <div class="subnav"><span class="cardmeta">Click the cell in question, then type the objection and the quantity it points to.</span></div>
@@ -387,7 +390,7 @@
   </div>
   <table class="rowtable" id="crittable"></table>
 
-  <div class="fac"><b>Per critique, one follow-up:</b> "what would you need to see measured to accept it?" The quantity column holds that answer (a number, an error, a latency, a rate). Do not defend the coloring; take the objection down as stated.</div>
+  <div class="fac"><b>Two phases.</b> Blind (about 8 min): take every objection down as stated, one follow-up each: "what would you need to see measured to accept it?" Do not defend the coloring and do not open a card yet. Reveal (about 7 min): only for cells that were objected to, press "show our numbers", read the card, then the expert picks accepted / with reservation / not accepted and types what is still missing. Never open cards for cells without an objection.</div>
 
   <h3>Open questions</h3>
   <div class="qa"><div class="q">Is there an interaction native to inertial sensing that the grid has no place for?</div>
@@ -682,29 +685,67 @@ function renderFree(){
       <td><button class="rm" onclick="rmFree(${i})" title="remove">✕</button></td></tr>`).join('');
 }
 
+/* ---------- measurement cards (from Section 6; shown only after an objection is recorded) ---------- */
+const CARDS = {
+ 'Head × Trigger': {id:'C1', what:'content appears when the wearer sets off and retreats when they halt', q:'walk onset / halt detection from the glasses alone', n:'catches 85% of onsets and 79% of halts; on time at the mean (+0.01 / +0.04 s), lateness P90 +0.60 / +0.78 s; 0.77 false triggers per minute', bar:'deployed walk detectors: under 3% error, 0.92 to 0.97 sensitivity', v:'delivered; misses are bouts shorter than the 1 s dwell'},
+ '+Arm × Trigger': {id:'C2', what:'content appears when the forearm rises, withdraws when it lowers', q:'raise detection (45 degree elevation crossing)', n:'recall 100% on the primary fold (94.7% pooled), precision 89.5%; fires early on average (-0.02 s), lateness P90 0.10 to 0.21 s; no false fires during walking', bar:'65 ms perceptible latency for a commanded trigger', v:'delivered'},
+ '+Body × Trigger': {id:'C3', what:'content resumes when the wearer sits down, pauses when they stand', q:'sit-down detection per wearer (pelvis height rule, half-second dwell)', n:'fires for 9 of 10 held-out wearers (CI 55 to 100%), +0.54 s mean lateness; the miss is a bar-stool perch', bar:'94% of a deployed transition detector, as context', v:'delivered as a context change, not a posture gesture'},
+ '+Arm × Track': {id:'C4', what:'the forearm direction steers a cursor', q:'elbow to wrist ray direction error', n:'15.3 degrees at the mean, 30.2 degrees at P90; folds agree (12.5 to 18.2)', bar:'no external bar; minimum eyes-free target width = 2 x P90 = about 60 degrees', v:'eyes-free pointing selects among a handful of large regions; closed-loop pointing is strictly easier'},
+ '+Body × Track': {id:'C5', what:'joint motion is read continuously to count repetitions', q:'target-joint angle error over the movement range', n:'watch-side joints 4 to 10% of range; knee on squats 16.4% at the mean, 43.8% at P90', bar:'one fifth of the repetition range', v:'countable at the mean, tail-heavy at the decile'},
+ '+Arm × Anchor': {id:'C6', what:'content stays on the wrist as the arm moves', q:'wrist to head relative position error, walking with arm swing', n:'9.05 cm mean, 14.88 cm P90 walking; 10.73 / 18.76 cm over all frames; between consecutive looks 6.0 / 10.3 cm', bar:'5.04 cm perceptible; 7.8 to 13.4 cm where content stops feeling attached', v:'offset perceptible, inside the lower half of the obtrusive band; noise-dominated, not fixable by calibration'},
+ '+Body × Anchor': {id:'C7', what:'content stays in front of the torso as the head looks around', q:'torso to head yaw error', n:'8.09 degrees mean, 13.41 P90 under head movement (8.4 / 13.9 cm on a panel at 0.6 m); later looks find the panel within 6.2 / 12.1 degrees of the first', bar:'10.5 cm panel bar; plus or minus 15 degree regions', v:'inside both bars at the mean, past the panel bar at the decile; half the error is a constant per-person offset'},
+ 'Head × Track': {id:'C8', what:'content follows the wearer own path and pace', q:'ego-position drift over time, glasses only, no fix', n:'0.83 m at 30 s, 1.33 m at 60 s, 2.52 m at 235 s (P90 5.02 m); one fix every 20 s holds the time-averaged error at 0.34 m', bar:'a few meters for indoor navigation', v:'the mean holds the bar for the whole recording; the P90 tail crosses 2 m within a minute; a fix every minute or two suffices'},
+ 'Head × Anchor': {id:'C9', what:'content stays at a world position near the wearer', q:'world-anchor registration error over time', n:'free-running, a 1 degree budget survives about 0.1 s; a 2 cm fix already exhausts the budget within 2 m; at 3 m two fixes per second, at 10 m one every 5 s', bar:'about 1 degree world-anchoring budget', v:'bounded by fix quality, not rate; distance is what makes anchoring affordable'},
+ '+Scene × Trigger': {id:'frontier', what:'a proximity trigger on a scanned object', q:'lifetime of a half-meter proximity trigger under ego-position drift', n:'9 s at the median, 48 s at P90 free-running; the applications use a one-time scan and a distance check', bar:'the same drift curve as C8, read at trigger tolerance', v:'priced as the one-time-fix limit of the C8 curve'},
+ '+Scene × Track': {id:'frontier', what:'continuous manipulation of world-registered content', q:'differential motion within a gesture', n:'a differential track survives indefinitely under drift (errors self-correct within the gesture)', bar:'the same drift curve, read at track tolerance', v:'priced as the one-time-fix limit of the C8 curve'},
+ '+Scene × Anchor': {id:'frontier', what:'content pinned to an object or a room', q:'world-anchor error after a one-time scan (C9 at the one-fix limit)', n:'a 1 degree budget allows 3.5 cm at 2 m; within about 2 m no fix rate holds it; the applications register once with a Polycam scan and never stream a camera', bar:'about 1 degree world-anchoring budget', v:'purple: needs the imported scan; how long an anchor holds after one fix is the number the designer budgets'},
+ '+Social × Trigger': {id:'frontier', what:'a partner arrival or touch fires an event', q:'the same proximity lifetime held by two users', n:'degrades at the sum of both users drifts; the applications share a common physical start and exchange estimates over the network', bar:'the same drift curve, doubled', v:'purple: needs a shared setup'},
+ '+Social × Track': {id:'frontier', what:'a partner ongoing motion read live', q:'relative pose between two users', n:'each user runs their own IMU inference; relative error is the sum of both drifts; a differential read tolerates it', bar:'the same drift curve, doubled', v:'purple: needs a common start'},
+ '+Social × Anchor': {id:'frontier', what:'content two co-located users hold in a shared frame', q:'shared registration error, both users drifting', n:'the sum of two C9 curves; the shared-screen prototype uses one common start and no camera during use', bar:'about 1 degree, held by both users', v:'purple: the hardest case; every odometry improvement counts twice here'},
+};
+
 /* ---------- critique ---------- */
 let critSel = null;
 function pickCrit(f,c){ critSel = [f,c]; markGrid('ck', critSel);
   document.getElementById('critstate').textContent = 'cell: ' + cellName(critSel); }
 function addCrit(){
   if (!critSel) { document.getElementById('critstate').textContent = 'click a cell first'; return; }
-  crit.cells.push({cell:cellName(critSel), objection:'', quantity:''});
+  crit.cells.push({cell:cellName(critSel), objection:'', quantity:'', revealed:false, verdict:'', missing:''});
   critSel = null; markGrid('ck', null);
   document.getElementById('critstate').textContent = 'click a cell';
   save(K.crit, crit); renderCrit();
   const tas = document.querySelectorAll('#crittable textarea'); if (tas.length) tas[tas.length-2].focus();
 }
 function setCrit(i, k, v){ crit.cells[i][k] = v; save(K.crit, crit); }
+function revealCrit(i){ crit.cells[i].revealed = true; save(K.crit, crit); renderCrit(); }
 function rmCrit(i){ crit.cells.splice(i,1); save(K.crit, crit); renderCrit(); }
 function renderCrit(){
   const t = document.getElementById('crittable'); if (!t) return;
   if (!crit.cells.length) { t.innerHTML = ''; return; }
-  t.innerHTML = '<tr><th style="width:18%">Cell</th><th>Objection</th><th>Quantity it points to</th><th></th></tr>' +
-    crit.cells.map((c,i)=>`<tr>
-      <td class="need">${c.cell}</td>
+  t.innerHTML = '<tr><th style="width:18%">Cell</th><th>Objection</th><th>What would have to be measured</th><th></th></tr>' +
+    crit.cells.map((c,i)=>{
+      const k = CARDS[c.cell];
+      const card = c.revealed && k ? `<tr class="cardrow"><td colspan="4"><div class="card">
+          <div class="cardhead">${k.id === 'frontier' ? 'Priced by the frontier characterization' : 'Measured as ' + k.id}: ${esc(k.what)}</div>
+          <div><b>Quantity:</b> ${esc(k.q)}</div>
+          <div><b>Result:</b> ${esc(k.n)}</div>
+          <div><b>Bar:</b> ${esc(k.bar)}</div>
+          <div><b>Reading:</b> ${esc(k.v)}</div>
+          <div class="fields" style="margin-top:8px">
+            <div class="radios"><div style="color:var(--muted);margin-bottom:2px">with these numbers, the coloring is</div>
+              <label><input type="radio" name="vd${i}" value="accepted" ${c.verdict==='accepted'?'checked':''} onchange="setCrit(${i},'verdict','accepted')"> accepted</label>
+              <label><input type="radio" name="vd${i}" value="reservation" ${c.verdict==='reservation'?'checked':''} onchange="setCrit(${i},'verdict','reservation')"> accepted with reservation</label>
+              <label><input type="radio" name="vd${i}" value="rejected" ${c.verdict==='rejected'?'checked':''} onchange="setCrit(${i},'verdict','rejected')"> not accepted</label>
+            </div>
+            <div><div style="color:var(--muted);margin-bottom:2px">what is still missing</div>
+              <textarea oninput="setCrit(${i},'missing',this.value)">${esc(c.missing)}</textarea></div>
+          </div></div></td></tr>` : '';
+      return `<tr>
+      <td class="need">${c.cell}${(!c.revealed && k) ? `<br><button onclick="revealCrit(${i})" style="margin-top:6px">show our numbers</button>` : ''}</td>
       <td><textarea oninput="setCrit(${i},'objection',this.value)">${esc(c.objection)}</textarea></td>
       <td><textarea oninput="setCrit(${i},'quantity',this.value)">${esc(c.quantity)}</textarea></td>
-      <td><button class="rm" onclick="rmCrit(${i})" title="remove">✕</button></td></tr>`).join('');
+      <td><button class="rm" onclick="rmCrit(${i})" title="remove">✕</button></td></tr>` + card;
+    }).join('');
 }
 const CROPEN = ['noPlace','mostUseful','leastUseful','rename'];
 function saveCritOpen(){ CROPEN.forEach(k => crit[k] = document.getElementById('cr_'+k).value); save(K.crit, crit); }
@@ -726,7 +767,7 @@ function exportSession(){
     afterReflection: { unprompted: afterRefl.unprompted||'', likert: afterRefl.likert||null },
     demos: { thoughtOf: demos.thoughtOf.slice(), missing: demos.missing||'' },
     freeDesign: { name: free.name||'', items: free.items.map(x=>({interaction:x.interaction, cells:x.cells.map(cellName), call:x.call||'', expected: chainExpected(x.cells)||'', why:x.why||''})) },
-    critique: { cells: crit.cells.map(c=>({cell:c.cell, objection:c.objection||'', quantity:c.quantity||''})),
+    critique: { cells: crit.cells.map(c=>({cell:c.cell, objection:c.objection||'', quantity:c.quantity||'', afterNumbers: c.revealed ? {verdict:c.verdict||'', missing:c.missing||''} : null})),
       noPlace: crit.noPlace||'', mostUseful: crit.mostUseful||'', leastUseful: crit.leastUseful||'', rename: crit.rename||'' },
     closing: { carry: closing.carry||'', ignore: closing.ignore||'' }
   };
