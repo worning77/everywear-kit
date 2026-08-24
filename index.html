@@ -19,12 +19,12 @@
   body { background:var(--ground); color:var(--ink);
     font-family:"Charter","Iowan Old Style",Georgia,serif;
     line-height:1.65; margin:0; padding:0 0 80px; font-size:19px; }
-  .wrap { max-width: 860px; margin: 0 auto; padding: 0 24px; }
+  .wrap { max-width: 900px; margin: 0 auto; padding: 0 24px; }
   h1 { font-size:30px; margin:14px 0 4px; }
   h2 { font-size:24px; margin:26px 0 10px; }
   h3 { font-size:19px; margin:20px 0 6px; }
   p { max-width:72ch; margin:10px 0; }
-  .sans, .fac, .stepnav, .subnav, .cardmeta, .topbar, button, .pill
+  .sans, .fac, .stepnav, .subnav, .cardmeta, .topbar, button, .pill, .form, .rowtable, .cellpicker
     { font-family:-apple-system,"Segoe UI","Helvetica Neue",sans-serif; }
 
   /* top bar */
@@ -39,8 +39,7 @@
   #facbtn { opacity:.45; } #facbtn:hover { opacity:1; }
   body.fac-on #facbtn { opacity:1; background:var(--fac-border); border-color:var(--fac-border); color:#fff; }
   #clock { font-variant-numeric:tabular-nums; font-size:13px; color:var(--muted);
-    cursor:pointer; display:none; }
-  body.fac-on #clock { display:inline; }
+    cursor:pointer; display:inline; }
 
   /* steps */
   .step { display:none; padding-top:8px; }
@@ -55,11 +54,15 @@
     border-left:4px solid var(--fac-border); border-radius:6px;
     padding:10px 16px; margin:14px 0; font-size:14.5px; color:var(--fac-ink); }
   .fac b, .fac strong { color:var(--fac-ink); }
+  #briefwarn:empty { display:none !important; }
   body.fac-on .fac { display:block; }
   .fac table { border-collapse:collapse; width:100%; font-size:13.5px; margin:8px 0; }
   .fac td, .fac th { border-top:1px solid var(--fac-border); padding:5px 8px 5px 0;
     text-align:left; vertical-align:top; }
   .fac th { white-space:nowrap; padding-right:14px; }
+  .fac input, .fac textarea, .fac select { font-size:13.5px; padding:5px 8px; border:1px solid var(--fac-border);
+    border-radius:6px; background:var(--panel); color:var(--ink); width:100%; }
+  .fac textarea { min-height:44px; resize:vertical; }
   @media print { .fac, .topbar, .stepnav, .subnav { display:none !important; }
     .step { display:block !important; } }
 
@@ -71,15 +74,17 @@
 
   /* cards */
   .card { background:var(--panel); border:1px solid var(--faint); border-radius:10px;
-    padding:26px 30px; margin:16px 0; font-size:23px; line-height:1.6; min-height:120px; }
+    padding:22px 28px; margin:16px 0; font-size:21px; line-height:1.6; }
+  .card ol { margin:8px 0 0; padding-left:26px; } .card li { margin:6px 0; }
   .cardmeta { color:var(--muted); font-size:14px; margin-top:6px; }
-  .subnav { display:flex; gap:8px; align-items:center; margin:10px 0; }
+  .subnav { display:flex; gap:8px; align-items:center; margin:10px 0; flex-wrap:wrap; }
   .subnav button { font-size:14px; padding:5px 14px; border-radius:6px;
     border:1px solid var(--faint); background:var(--panel); color:var(--ink); cursor:pointer; }
   .subnav button.primary { background:var(--blue); border-color:var(--blue); color:#fff; }
   .subnav .spacer { flex:1; }
+  .subnav label { font-size:14px; color:var(--muted); }
 
-  /* T1 clickable grid */
+  /* clickable grid */
   .pickgrid { display:grid; grid-template-columns:78px repeat(5,1fr); gap:6px;
     margin:14px 0; max-width:820px; font-family:-apple-system,"Segoe UI",sans-serif; }
   .pickgrid .hdr { font-size:13px; text-align:center; color:var(--muted); font-weight:650; padding:4px 0; }
@@ -88,16 +93,58 @@
   .pickgrid .cell { border:1.5px solid var(--faint); background:var(--panel); border-radius:8px;
     min-height:54px; cursor:pointer; }
   .pickgrid .cell:hover { border-color:var(--blue); }
-  .pickgrid .cell.sel { background:var(--blue); border-color:var(--blue); }
-  .pickgrid .cell.sel2 { border-color:var(--blue); border-style:dashed; border-width:2.5px; }
-  .subnav input[type=text], #nofitbox textarea { flex:1; font-size:16px; padding:8px 12px;
-    border:1px solid var(--faint); border-radius:8px; background:var(--panel); color:var(--ink);
+  .pickgrid .cell.sel { border-color:var(--ink); box-shadow:0 0 0 3px var(--ink) inset; background:var(--panel); }
+  .pickgrid.small { max-width:560px; gap:4px; grid-template-columns:62px repeat(5,1fr); }
+  .pickgrid.small .cell { min-height:34px; }
+  .pickgrid.small .hdr, .pickgrid.small .rowl { font-size:11.5px; }
+
+  /* live color swatch (1b) */
+  .swatch { display:inline-block; width:22px; height:22px; border-radius:6px; vertical-align:middle;
+    border:1px solid var(--faint); margin-right:6px; }
+  .sw-blue { background:var(--blue); }
+  .sw-purple { background:var(--purple); }
+  .sw-gradient { background:linear-gradient(90deg, var(--blue), var(--purple)); }
+  .sw-none { background:transparent; border-style:dashed; }
+
+  /* row tables (1a facilitator table, 1b redo table, critique) */
+  .rowtable { width:100%; border-collapse:collapse; font-size:14.5px; margin:10px 0; }
+  .rowtable th { text-align:left; color:var(--muted); font-weight:650; font-size:12.5px;
+    padding:6px 8px 4px 0; border-bottom:1px solid var(--faint); }
+  .rowtable td { padding:8px 8px 8px 0; border-bottom:1px solid var(--faint); vertical-align:top; }
+  .rowtable input[type=text], .rowtable textarea, .rowtable select { width:100%; font-size:14px; padding:6px 8px;
+    border:1px solid var(--faint); border-radius:6px; background:var(--panel); color:var(--ink);
     font-family:-apple-system,"Segoe UI",sans-serif; }
-  #nofitbox { margin:10px 0; display:none; }
-  #nofitbox textarea { width:100%; min-height:64px; }
-  .placed { font-size:15px; margin:4px 0; }
-  .placed button { border:none; background:none; color:var(--muted); cursor:pointer; font-size:14px; }
-  .bd { color:var(--purple); }
+  .rowtable textarea { min-height:52px; resize:vertical; }
+  .rowtable .need { font-family:"Charter","Iowan Old Style",Georgia,serif; font-size:17px; min-width:150px; }
+  .rowtable .radios label { display:block; font-size:13.5px; white-space:nowrap; margin:2px 0; cursor:pointer; }
+  .rowtable button.rm { border:none; background:none; color:var(--muted); cursor:pointer; font-size:14px; }
+  .redo { background:var(--panel); border:1px solid var(--faint); border-radius:10px; padding:14px 18px; margin:14px 0; }
+  .redo .need { font-size:20px; margin-bottom:6px; }
+  .redo .meta { font-size:14px; color:var(--muted); font-family:-apple-system,"Segoe UI",sans-serif; }
+  .redo .fields { display:grid; grid-template-columns:1fr 1fr; gap:10px 18px; margin-top:8px;
+    font-family:-apple-system,"Segoe UI",sans-serif; font-size:14px; }
+  @media (max-width:700px){ .redo .fields { grid-template-columns:1fr; } }
+  .redo textarea, .redo input[type=text] { width:100%; font-size:14px; padding:6px 8px; border:1px solid var(--faint);
+    border-radius:6px; background:var(--panel); color:var(--ink); font-family:inherit; }
+  .redo textarea { min-height:48px; resize:vertical; }
+  .redo .radios label { display:block; margin:2px 0; cursor:pointer; }
+  .redo .cellline { font-size:15px; margin:4px 0; }
+  .redo.open { border-color:var(--blue); }
+
+  .form { display:grid; grid-template-columns:1fr 1fr; gap:12px; max-width:720px; margin:10px 0 20px; }
+  @media (max-width:700px){ .form { grid-template-columns:1fr; } }
+  .form label { display:block; font-size:13px; color:var(--muted); margin-bottom:3px; }
+  .form input, .form select { width:100%; font-size:15px; padding:7px 10px;
+    border:1px solid var(--faint); border-radius:8px; background:var(--panel); color:var(--ink); }
+  .qa { margin:16px 0; }
+  .qa .q { font-size:19px; margin-bottom:6px; }
+  .qa textarea { width:100%; min-height:70px; font-size:15px; padding:8px 10px; border:1px solid var(--faint);
+    border-radius:8px; background:var(--panel); color:var(--ink); font-family:-apple-system,"Segoe UI",sans-serif; resize:vertical; }
+  .likert { display:flex; gap:6px; align-items:center; flex-wrap:wrap; font-family:-apple-system,"Segoe UI",sans-serif; font-size:14px; }
+  .likert label { border:1px solid var(--faint); border-radius:8px; padding:8px 14px; cursor:pointer; background:var(--panel); }
+  .likert label.on { background:var(--blue); border-color:var(--blue); color:#fff; }
+  .likert input { display:none; }
+  .likert .end { color:var(--muted); font-size:13px; }
 
   .grid-fig { width:100%; max-width:820px; border:1px solid var(--faint); border-radius:6px; cursor:zoom-in; }
   #lightbox { display:none; position:fixed; inset:0; background:rgba(8,10,14,.9); z-index:50;
@@ -115,14 +162,16 @@
   .vid { margin:18px 0 26px; }
   .vid h3 { margin-bottom:4px; }
   .vid .narr { color:var(--muted); font-size:15px; }
+  .vid .cells { font-family:-apple-system,"Segoe UI",sans-serif; font-size:13.5px; color:var(--muted); margin:4px 0; }
+  .vid .cells span { display:inline-block; border:1px solid var(--faint); border-radius:10px; padding:1px 9px; margin:2px 4px 2px 0; }
+  .vid label.thought { display:inline-block; font-family:-apple-system,"Segoe UI",sans-serif; font-size:14px; margin-top:6px; cursor:pointer; }
   .blue { color:var(--blue); font-weight:650; } .purple { color:var(--purple); font-weight:650; }
-  .brief { display:none; } .brief.show { display:block; }
-  .demo { display:grid; grid-template-columns:1fr 1fr; gap:12px; max-width:700px;
-    font-family:-apple-system,"Segoe UI",sans-serif; margin:10px 0 20px; }
-  @media (max-width:700px){ .demo { grid-template-columns:1fr; } }
-  .demo label { display:block; font-size:13px; color:var(--muted); margin-bottom:3px; }
-  .demo input, .demo select { width:100%; font-size:15px; padding:7px 10px;
-    border:1px solid var(--faint); border-radius:8px; background:var(--panel); color:var(--ink); }
+  .grad { font-weight:650; background:linear-gradient(90deg,var(--blue),var(--purple)); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .tpage { display:none; } .tpage.show { display:block; }
+  .legend { display:grid; grid-template-columns:auto 1fr; gap:8px 14px; align-items:start; margin:12px 0; max-width:820px; }
+  .legend .swatch { width:26px; height:26px; margin-top:6px; }
+  .rule { font-size:24px; line-height:1.5; background:var(--panel); border:1px solid var(--faint); border-radius:10px;
+    padding:26px 30px; margin:16px 0; }
   details summary { cursor:pointer; }
   code { font-family:ui-monospace,Menlo,monospace; font-size:.85em; }
 </style>
@@ -133,313 +182,285 @@
   <span id="pills"></span>
   <span class="spacer"></span>
   <span id="clock" title="click to start/pause">00:00</span>
-  <span class="pill" id="facbtn" title="toggle facilitator layer (or press Cmd+F / Ctrl+F, or open with #fac)">◐ facilitator</span>
+  <span class="pill" id="facbtn" title="toggle facilitator layer (or press F outside a text field, or open with #fac)">◐ facilitator</span>
 </div>
 
 <div class="wrap">
 
-<!-- ============ STEP 0 · WELCOME ============ -->
+<!-- ============ STEP 0 · INTRO ============ -->
 <section class="step" id="s0">
-  <h1>EveryweAR — Expert Session</h1>
-  <p class="sans" style="color:var(--muted);font-size:14px">Kit v2 · 2026-08-04 · this page is the screen-share surface for the whole session. Participant-facing text is ready to read aloud; the orange facilitator layer stays hidden unless toggled (press Cmd+F / Ctrl+F, or open a private window with <code>#fac</code>).</p>
+  <h1>EveryweAR: Expert Session</h1>
+  <p class="sans" style="color:var(--muted);font-size:14px">Kit v3 · 2026-08-24 · this page is the screen-share surface for the whole session. Participant-facing text is ready to read aloud; the orange facilitator layer stays hidden unless toggled (press F while no text field is focused, or open a private window with <code>#fac</code>).</p>
 
   <div class="script"><span class="say">read aloud</span><br>
-  Thank you for joining. Over the next 75 minutes you will review a design framework for AR interaction: first a short tutorial, then four small tasks. You will classify a few published techniques, tell us what the framework misses, design with it, and sketch an application. There are no right answers we are hiding; where you disagree with the framework is exactly the data we want. We record audio and this screen. Any questions before we start?</div>
-
-  <div class="fac"><b>Before the session.</b> Consent signed · recording ON (audio + screen) · demographics form lives at the Wrap-up step (fill it during the closing chat). IRB: <b>STU00226775, exempt</b> · $50 Tango after session · 75 min target.
-  <table>
-    <tr><th>0–5</th><td>consent · background</td><th>35–58</th><td>T3 generation (main task)</td></tr>
-    <tr><th>5–15</th><td>tutorial + comprehension check</td><th>58–62</th><td>demo videos (5 × ~45 s)</td></tr>
-    <tr><th>15–27</th><td>T1 classification, 10 cards</td><th>62–72</th><td>T4 design probe (one brief)</td></tr>
-    <tr><th>27–35</th><td>T2 positioning</td><th>72–75</th><td>closing interview</td></tr>
-  </table>
-  <b>Order is load-bearing:</b> demos AFTER generation, or category-(b) yield collapses. Start the clock (top right) at consent.</div>
-</section>
-
-<!-- ============ STEP 1 · TUTORIAL ============ -->
-<section class="step" id="s1">
-  <h2>What this study is</h2>
-  <div class="script"><span class="say">say first, before any definitions</span><br>
-  We built a map of embodied AR interaction: ways of interacting where the body itself is the input. The map has two axes, and it is colored by what camera-free sensors on everyday devices, glasses, a watch, a phone, can deliver. Today we want to know whether this map works for someone like you: whether its categories are clearly separated, whether anything you know is missing from it, and whether you can design new things with it. The four tasks test exactly that. One unit matters all day: the map classifies <b>interaction techniques</b>, one input act and what it does. It does not classify applications; an app is built from many techniques, and each technique gets its own cell.</div>
-
-  <h2>The space, in two questions</h2>
-  <p>We organize embodied AR interaction by two questions about any technique.</p>
-
-  <div class="two">
-    <div class="axis">
-      <h3>1 · Reference frame: what does the content bind to?</h3>
-      <ul>
-        <li><span class="frame">HEAD</span> — the user's viewpoint (view-locked content, head-motion events)</li>
-        <li><span class="frame">+ARM</span> — the forearm, wrist, or hand</li>
-        <li><span class="frame">+BODY</span> — the torso or whole-body posture</li>
-        <li><span class="frame">+SCENE</span> — an object, surface, or room in the world</li>
-        <li><span class="frame">+SOCIAL</span> — another person</li>
-      </ul>
-    </div>
-    <div class="axis">
-      <h3>2 · Commitment: how much geometry does it hold?</h3>
-      <ul>
-        <li><b>Trigger</b> — a discrete moment fires something (nod, tap, posture change, zone entry); the commitment ends the moment it fires</li>
-        <li><b>Track</b> — continuous motion maps to continuous output while you act (pointing, dragging, rep counting)</li>
-        <li><b>Anchor</b> — content is placed in the frame and must persist there: still in place after you look away, leave, and come back</li>
-      </ul>
-    </div>
-  </div>
-
-  <h3>The rules of thumb</h3>
-  <ul>
-    <li><b>Binding, not device.</b> A ring, watch, or camera is a sensor, not a frame: a pinch detected by a ring and the same pinch detected by a camera are both +Arm.</li>
-    <li><b>Outermost frame.</b> Pick the outermost frame the content genuinely recruits. Pointing your arm at a world target binds to the world (+Scene); tapping your own forearm binds to the arm (+Arm).</li>
-    <li><b>+Social means another person is essential:</b> content binds to their body frame (a health bar above your opponent) or to a frame shared between users (a screen two people must see at the same place, at the same time). Content left in the world for others to find later, a Pokémon&nbsp;Go gym, needs no frame with a particular person: that is +Scene.</li>
-    <li><b>Primary commitment.</b> Many techniques are composites (a track substrate with a trigger commit). Code by the defining act: the thing the technique exists to do. A palm menu summoned with a tap: the menu is transient scaffolding, the tap that commits a choice defines it → trigger. A label stuck to a machine that must still be there tomorrow: the sticking gesture fires once, the persistence defines it → anchor.</li>
-    <li><b>Ego-position.</b> The head frame also carries the body's own place in the world: a walked trajectory, content pinned where you stood. Head-orientation content is drift-free; ego-position content rides the frontier.</li>
-  </ul>
-
-  <h3>The frontier</h3>
-  <p><span class="blue">Body-bound frames (blue)</span> are recoverable from on-body inertial sensors alone, no camera. <span class="purple">World- and person-bound frames (purple)</span> need an occasional external fix (a one-time scan, a shared start) because inertial position drifts. The design rule: place a demanding interaction at the simplest frame that holds it; spend the fix only when the frame truly requires it.</p>
-
-  <img class="grid-fig" src="everyweAR-Material/design-space-recolor.png" alt="The EveryweAR design space grid, five frames by three commitments, colored by the frontier">
-  <div class="script"><span class="say">say once, pointing at the figure</span><br>
-  Each cell here shows one example we built. A cell is a category; many different techniques can live in the same cell. Your tasks today are about the grid itself, not about our examples.</div>
-
-  <div class="fac"><b>Tutorial answers live above</b> (the five rules). Do not add definitions on the fly; if a question is not answered by a rule, note it as tutorial feedback. Target: done by minute 15.</div>
-</section>
-
-<!-- ============ STEP 2 · COMPREHENSION CHECK ============ -->
-<section class="step" id="s2">
-  <h2>Quick check</h2>
-  <div class="script"><span class="say">ask</span><br>
-  Before the tasks, two warm-ups. Where would you place: <b>a head nod that dismisses a notification?</b> And: <b>a note pinned to a door?</b></div>
-  <div class="fac"><b>Answers:</b> head nod → Head × Trigger (<span class="blue">blue</span>) · door note → +Scene × Anchor (<span class="purple">purple</span>). Correct both before proceeding; more than 2 corrections = tutorial too dense (pilot watch-list).</div>
-</section>
-
-<!-- ============ STEP 3 · T1 CLASSIFICATION ============ -->
-<section class="step" id="s3">
-  <h2>Task 1 · Classify ten techniques <span style="color:var(--muted);font-size:16px">(12 min)</span></h2>
-  <div class="script"><span class="say">read aloud</span><br>
-  I will show you ten short descriptions of published AR/VR interaction techniques, one at a time. Each card is one technique: a single input act and what it does, not a whole application. Classify what the card describes, not an app it could live in. For each, click the cell it belongs to on the grid below, and say your reasoning out loud. There are no trick questions. If a card genuinely fits two cells, tick the box and pick a second; your first pick should be the single best fit. If you see more than two, tell me which and why, I will note it, the grid records your best two.</div>
-
-  <div class="subnav">
-    <button onclick="card(-1)">◀ prev card</button>
-    <span class="cardmeta" id="cardnum"></span>
-  </div>
-  <div class="card" id="cardbox"></div>
-  <div class="pickgrid" id="t1grid"></div>
-  <div class="subnav">
-    <label class="cardmeta"><input type="checkbox" id="twofit" onchange="twofitChanged()"> fits two cells (pick a second)</label>
-    <span class="spacer"></span>
-    <span class="cardmeta" id="pickstate">click a cell</span>
-    <button class="primary" onclick="submitT1()">submit ▶</button>
-  </div>
-  <div class="fac" id="cardkey"></div>
-  <div class="fac" id="t1log"></div>
-
-  <div class="fac"><b>Never correct during the task.</b> Hesitation and reasoning live on the recording. If over time, cut to 8 cards: drop 9 and 11.</div>
-</section>
-
-<!-- ============ STEP 4 · T2 POSITIONING ============ -->
-<section class="step" id="s4">
-  <h2>Task 2 · Position your own work <span style="color:var(--muted);font-size:16px">(8 min)</span></h2>
-  <div class="script"><span class="say">read aloud</span><br>
-  Now think of your own work, or any embodied AR/VR techniques you know well. Pick two or three. For each, tell me the technique, we will note it down, and click the cell where it lives. Then the key question: can you think of any embodied AR interaction that does <b>not</b> fit in any cell?</div>
-
-  <div class="subnav">
-    <input type="text" id="t2name" placeholder="technique name or one-line description">
-  </div>
-  <div class="pickgrid" id="t2grid"></div>
-  <div class="subnav">
-    <span class="cardmeta" id="t2state">type a name, then click its cell</span>
-    <span class="spacer"></span>
-    <button class="primary" onclick="addT2()">add placement</button>
-    <button onclick="noFitOpen()" style="border-color:var(--purple);color:var(--purple)">⚑ fits nowhere</button>
-  </div>
-  <div id="nofitbox">
-    <textarea id="nofittext" placeholder="the interaction that fits no cell — verbatim, in the expert's words"></textarea>
-    <div class="subnav"><span class="spacer"></span><button class="primary" onclick="saveNoFit()">record boundary finding</button></div>
-  </div>
-  <div id="t2list"></div>
-
-  <div class="fac"><b>Guidance.</b> Placements and boundary findings are saved locally (log below). A genuine non-fit is a boundary finding for the discussion, not a failure. Do not defend the space; probe once: "what stops it from fitting?" If the expert wants to re-check cell definitions, flip back to the Tutorial step, and note that they needed to.</div>
-  <div class="fac" id="t2log"></div>
-</section>
-
-<!-- ============ STEP 5 · T3 GENERATION ============ -->
-<section class="step" id="s5">
-  <h2>Task 3 · Design with the space <span style="color:var(--muted);font-size:16px">(23 min · the main task)</span></h2>
-  <div class="script"><span class="say">read aloud</span><br>
-  Now I want you to design <b>with</b> the space. I will give you three cells one at a time. For each, propose one or two interaction techniques that belong in that cell, different from the example in the figure. By technique I mean what the user does and what the content does, not an app idea. Think aloud; rough is fine, feasibility is our problem, not yours. I will note each idea down as we go, correct me if my label is wrong.</div>
-
-  <div class="subnav">
-    <button onclick="prompt3(-1)">◀ prev</button>
-    <span class="cardmeta" id="promptnum"></span>
-    <button onclick="prompt3(1)">next prompt ▶</button>
-  </div>
-  <div class="card" id="promptbox"></div>
-  <div class="fac" id="promptfac"></div>
-
-  <div class="subnav">
-    <input type="text" id="t3name" placeholder="one-line label for the proposal (facilitator types; audio holds the detail)">
-    <button class="primary" onclick="addT3()">note it</button>
-  </div>
-  <div id="t3list"></div>
-  <div class="fac" id="t3log"></div>
-
-  <div class="fac"><b>Per proposal:</b> the label here is an index; the verbatim description, the cell the EXPERT assigns, and unprompted frontier/sensing language live on the recording. <b>If they answer with a scenario or an app:</b> convert it, "what is the interaction there: what does the user do, and what does the content do?" Code only the technique. Push once per prompt ("what else?"), then move on. Never evaluate or praise ideas mid-task. If only reskins: contrast form, "the example is X, give me something that is NOT X."</div>
-</section>
-
-<!-- ============ STEP 6 · DEMOS ============ -->
-<section class="step" id="s6">
-  <h2>What we built <span style="color:var(--muted);font-size:16px">(~3.5 min)</span></h2>
-  <p>First one scenario that walks the hardest commitment, anchoring, across the frames; then five applications. All run live on glasses + watch + phone, no camera during use.</p>
-
-  <div class="vid"><h3>One scenario across the anchor row <span style="color:var(--muted);font-size:14px">(61 s)</span></h3>
-    <video controls preload="metadata" src="videos/teaser.mp4"></video>
-    <p class="narr">The same user carries content at every level of the anchor commitment: held at their own position by the glasses, on the wrist by the watch, on the body by the phone, pinned to the scanned room, and shared in a common frame with another person.</p></div>
-
-  <div class="vid"><h3>Indoor Navigator</h3>
-    <video controls preload="metadata" src="videos/navigator.mp4"></video>
-    <p class="narr">Walking trigger reveals the panel; the floor path is anchored to the building by a one-time scan; rerouting when the elevator is out.</p></div>
-  <div class="vid"><h3>AR Gaming</h3>
-    <video controls preload="metadata" src="videos/gaming.mp4"></video>
-    <p class="narr">Arm-direction aiming, arm-pose firing; the opponent's health bar rides a shared frame set by a common start.</p></div>
-  <div class="vid"><h3>Context-Aware System</h3>
-    <video controls preload="metadata" src="videos/context-aware.mp4"></video>
-    <p class="narr">A printer's status panel appears on approach; a grab copies progress to the wrist; a check-watch pose recalls it later.</p></div>
-  <div class="vid"><h3>Tele-Party</h3>
-    <video controls preload="metadata" src="videos/teleparty.mp4"></video>
-    <p class="narr">A shared world-anchored screen both users see in the same spot; standing pauses playback, sitting resumes it.</p></div>
-  <div class="vid"><h3>Pace Partner</h3>
-    <video controls preload="metadata" src="videos/pace-partner.mp4"></video>
-    <p class="narr">A body-anchored exercise panel that stays put while running; a friend's recorded run replays as a ghost.</p></div>
-
-  <div class="fac"><b>Timing (measured):</b> teaser 61 s · navigator 21 s · gaming 11 s · context-aware 31 s · teleparty 37 s · pace-partner 31 s ≈ 3.2 min total. Narrate over each using its caption line. The teaser plays FIRST and only here, never before T3 (its anchor-row scenarios would contaminate the generation prompts, which are anchor cells). If over time, the teaser is the cut.</div>
-</section>
-
-<!-- ============ STEP 7 · T4 DESIGN PROBE ============ -->
-<section class="step" id="s7">
-  <h2>Task 4 · Design an application <span style="color:var(--muted);font-size:16px">(10 min)</span></h2>
-  <div class="script"><span class="say">read aloud</span><br>
-  Last task. You are designing an AR application under a hard constraint: the user wears display glasses with an IMU, a smartwatch, and carries a phone. There is <b>no camera during use</b>. A one-time setup step, a prior room scan or users starting from the same spot, is allowed but expensive: use it only if you must. Using the grid, sketch the interactions for this app.</div>
-
-  <div class="subnav">
-    <button onclick="brief('A')" id="bA">Brief A</button>
-    <button onclick="brief('B')" id="bB">Brief B</button>
-    <span class="cardmeta">alternate A/B across experts</span>
-  </div>
-  <div class="card brief" id="briefA"><b>Gym training companion.</b> A user works out in a gym: they need to start and stop sets, see reps counted, keep a stats panel readable while moving, and optionally follow a friend's recorded run.</div>
-  <div class="card brief" id="briefB"><b>Warehouse picking assistant.</b> A worker picks items in a warehouse: they need item info when near a shelf, turn-by-turn guidance to the next bin, hands-free confirmation of each pick, and a persistent list they can check anytime.</div>
-
-  <div class="subnav">
-    <select id="t4req" style="font-size:14px;padding:6px 8px;border:1px solid var(--faint);border-radius:8px;background:var(--panel);color:var(--ink)"></select>
-    <input type="text" id="t4name" placeholder="the interaction, one line">
-    <input type="text" id="t4why" placeholder="their reason, one line (fill for any fix-expecting cell or mismatch)">
-  </div>
-  <div class="pickgrid" id="t4grid"></div>
-  <div class="subnav">
-    <label class="cardmeta"><input type="checkbox" id="t4fix"> spends the one-time fix (expert's call)</label>
-    <span class="spacer"></span>
-    <span class="cardmeta" id="t4state">pick the brief above first</span>
-    <button class="primary" onclick="addT4()">add</button>
-  </div>
-  <div id="t4list"></div>
-  <div class="fac" id="t4log"></div>
-
-  <div class="fac"><b>Probe intent.</b> A is solvable almost entirely in blue: does the expert keep it blue? B forces purple: do they spend the fix sparingly and put the list somewhere blue? Ideas beyond the brief's four needs are welcome: tag them "extra idea" and score them the same way. The ✓/✗ in the log compares the expert's fix call against the clicked cell's own coloring (blue = no fix; +Scene/+Social and Head track/anchor = fix); a mismatch is the moment to probe, not to correct. Watch for content placed on a scene surface (a mirror, a shelf) with no fix spent; probe once: how does the system know where that surface is? Whenever the picked cell expects a fix, and on every mismatch, type the expert's reason into the reason box in their words; the audio carries the full version.</div>
-
-  <div class="fac"><b>T4 scoring sheet — check each proposed interaction against the measured feasibility table (paper Table 1, final verdicts):</b>
-  <table>
-    <tr><th>Cell</th><th>Measured verdict</th><th>Expert call that matches</th></tr>
-    <tr><th>C1 Head×Trig walk/stop</th><td>deliverable: 88%/86% caught, lateness inside flow</td><td>gait/motion triggers = blue, no fix</td></tr>
-    <tr><th>C2 +Arm×Trig raise</th><td>deliverable: recall 100%, precision 89.5%</td><td>arm-pose triggers = blue</td></tr>
-    <tr><th>C3 +Body×Trig sit/stand</th><td>sit reliable (9/10); stand-up timing unreliable</td><td>flag any moment-critical action hung on a quick stand-up</td></tr>
-    <tr><th>C4 +Arm×Track pointing</th><td>eyes-free = panel-scale only (Ŵ≈60°); finer with a visible cursor</td><td>flag eyes-free icon-level selection as infeasible</td></tr>
-    <tr><th>C5 +Body×Track reps</th><td>countable: watch-side 4–10% of range; knee inside at mean</td><td>rep counting = blue</td></tr>
-    <tr><th>C6 +Arm×Anchor wrist</th><td>holds while walking: 9.05 cm, perceptible but attached</td><td>wrist-carried content = blue (a wrist list beats a world list)</td></tr>
-    <tr><th>C7 +Body×Anchor torso panel</th><td>holds at mean in stand-and-look (8.09°); decile past panel bar</td><td>torso panels = blue; flag dense tiny targets on them</td></tr>
-    <tr><th>C8 Head×Track ego</th><td>priced: 1.35 m @60 s free; fix per 20 s → 0.37 m; trigger commitments survive ~15 s free</td><td>guidance/trajectory = needs the fix; proximity triggers are cheap</td></tr>
-    <tr><th>C9 Head×Anchor world</th><td>priced: ≈0.1 s free; affordable ≥3 m; ≤2 m unreachable at 1°</td><td>world anchors only where needed, far preferred; close-range persistent content should move to the body</td></tr>
-  </table>
-  <b>Per interaction, tick four things:</b> (1) frame/commitment call plausible · (2) blue-vs-purple (fix needed?) call correct per the row above · (3) fix spent sparingly (one-time, only where required) · (4) design-rule language unprompted ("keep it on the body", "only the shelf info needs the scan"). This sheet is the §9 "design rule in use" evidence.</div>
-</section>
-
-<!-- ============ STEP 8 · WRAP-UP ============ -->
-<section class="step" id="s8">
-  <h2>Closing questions <span style="color:var(--muted);font-size:16px">(3 min)</span></h2>
-  <div class="script"><span class="say">ask</span><br>
-  Three last questions. Would this space change anything about how you approach your own AR work; what? What is missing from it, a frame, a commitment level, anything else? And who do you think this map is for?</div>
+  Thank you for joining. We are studying how designers make interaction decisions for AR glasses that have no camera during use. Over the next 75 minutes you will design for one scenario, twice, with a short tutorial in between; then you will see five things we built and tell us where you disagree with our map. There are no right answers; we want your reasoning aloud. We record audio and this screen. Any questions before we start?</div>
 
   <h3>Background <span style="color:var(--muted);font-size:14px">(for our records, one minute)</span></h3>
-  <div class="demo">
+  <div class="form">
     <div><label>Participant</label><select id="df_id" onchange="saveDemo()">
-      <option value="">—</option><option>Pilot</option><option>E1</option><option>E2</option>
-      <option>E3</option><option>E4</option><option>E5</option><option>E6</option><option>E7</option><option>E8</option></select></div>
+      <option value="">select</option><option>PILOT</option><option>E1</option><option>E2</option><option>E3</option><option>E4</option>
+      <option>E5</option><option>E6</option><option>E7</option><option>E8</option><option>E9</option><option>E10</option></select></div>
     <div><label>Role</label><select id="df_role" onchange="saveDemo()">
-      <option value="">—</option><option>AR/HCI researcher</option><option>AR/XR practitioner</option><option>Both</option><option>Other</option></select></div>
+      <option value="">select</option><option>AR/HCI researcher</option><option>AR/XR practitioner</option><option>Both</option><option>Other</option></select></div>
     <div><label>Years in AR/VR</label><input type="number" id="df_years" min="0" max="40" oninput="saveDemo()"></div>
     <div><label>Focus area</label><input type="text" id="df_focus" oninput="saveDemo()" placeholder="e.g. haptics, sensing, 3D UI"></div>
-    <div><label>Familiarity with body sensing (1–5)</label><select id="df_fam" onchange="saveDemo()">
-      <option value="">—</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></div>
+    <div><label>Familiarity with inertial sensing (1 to 5)</label><select id="df_fam" onchange="saveDemo()">
+      <option value="">select</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></div>
     <div><label>Session format</label><select id="df_fmt" onchange="saveDemo()">
-      <option value="">—</option><option>remote</option><option>in person</option></select></div>
+      <option value="">select</option><option>remote</option><option>in person</option></select></div>
+  </div>
+  <div class="fac" id="briefwarn"></div>
+
+  <div class="fac"><b>Before the session.</b> Consent signed · recording ON (audio + screen) · fill the background form now. IRB: <b>STU00226775, exempt</b> · $50 Tango after session · 75 min target. Start the clock (top right) at consent.
+  <table>
+    <tr><th>0–3</th><td>intro + background</td><th>40–48</th><td>demos (5 videos)</td></tr>
+    <tr><th>3–15</th><td>1a design WITHOUT the space</td><th>48–65</th><td>frontier critique</td></tr>
+    <tr><th>15–25</th><td>tutorial (3 pages + 2 warm-ups)</td><th>65–70</th><td>closing + export</td></tr>
+    <tr><th>25–40</th><td>1b redo WITH the space</td><th></th><td></td></tr>
+  </table>
+  <b>Brief assignment:</b> odd id = A (gym), even id = B (warehouse); PILOT defaults to A. The kit preselects from the id; override on the 1a page if needed. <b>Order is load-bearing:</b> the grid must not appear before 1a is finished; demos come after 1b.</div>
+</section>
+
+<!-- ============ STEP 1 · 1a DESIGN WITHOUT THE SPACE ============ -->
+<section class="step" id="s1">
+  <h2>Part 1 · Design for this hardware <span style="color:var(--muted);font-size:16px">(12 min)</span></h2>
+  <div class="script"><span class="say">read aloud</span><br>
+  Here is the hardware and a brief. For each of the five needs, tell me what the user does, where the content lives, and what the system would need beyond the sensors that are worn. Think aloud; I will take notes as you go and read them back so you can correct me.</div>
+
+  <div class="card"><b>Hardware.</b> The user wears AR glasses with an inertial unit (accelerometer, gyroscope). No camera and no eye tracker during use. A watch on one wrist and a phone in one pocket may be worn. A single scan or setup step at the start of a session is allowed if you want it; say so explicitly.</div>
+
+  <div class="fac">
+    <b>Brief</b> (default from id parity; override here):
+    <label style="margin-left:12px"><input type="radio" name="brief" value="A" onchange="setBrief('A')" style="width:auto"> A gym</label>
+    <label style="margin-left:12px"><input type="radio" name="brief" value="B" onchange="setBrief('B')" style="width:auto"> B warehouse</label>
+    <span id="briefstate" style="margin-left:12px"></span>
   </div>
 
-  <div class="fac"><b>After the session:</b> stop recording · <b>export the session below</b> · send $50 Tango · transcribe + first-pass T3 coding same evening (30 min while fresh).
+  <div class="card" id="briefcard"></div>
+
+  <h3>Notes <span style="color:var(--muted);font-size:14px">(facilitator types; expert corrects)</span></h3>
+  <table class="rowtable" id="beforetable"></table>
+
+  <div class="fac"><b>One follow-up only</b>, per need, when the content is placed somewhere: "What has to be known for it to stay there?" Do not mention frames, colors, fixes, or drift. If the expert asks what sensing is available, repeat the hardware statement verbatim. Leave a row blank rather than paraphrase beyond what was said.</div>
+</section>
+
+<!-- ============ STEP 2 · TUTORIAL ============ -->
+<section class="step" id="s2">
+  <h2>Tutorial <span style="color:var(--muted);font-size:16px">(10 min)</span></h2>
+  <div class="subnav">
+    <button onclick="tpage(0)" id="tp0">1 · two axes</button>
+    <button onclick="tpage(1)" id="tp1">2 · the grid</button>
+    <button onclick="tpage(2)" id="tp2">3 · design rule</button>
+    <button onclick="tpage(3)" id="tp3">warm-ups</button>
+  </div>
+
+  <div class="tpage" id="tpage0">
+    <div class="script"><span class="say">read aloud</span><br>
+    We organize embodied AR interaction by two questions. What does the content bind to? And how much does the system commit to?</div>
+    <div class="two">
+      <div class="axis">
+        <h3>Reference frame: what does the content bind to?</h3>
+        <ul>
+          <li><span class="frame">Head</span>: the viewpoint</li>
+          <li><span class="frame">+Arm</span>: the wrist and hand</li>
+          <li><span class="frame">+Body</span>: the torso and posture</li>
+          <li><span class="frame">+Scene</span>: objects and rooms</li>
+          <li><span class="frame">+Social</span>: another person or a frame two people share</li>
+        </ul>
+      </div>
+      <div class="axis">
+        <h3>Commitment: what does the frame do?</h3>
+        <ul>
+          <li><b>Trigger</b>: the frame's own state change fires an event (a nod, a tap on the palm, a hand touching a table)</li>
+          <li><b>Track</b>: the frame's continuous motion is the input</li>
+          <li><b>Anchor</b>: content stays registered in the frame over time</li>
+        </ul>
+      </div>
+    </div>
+    <p><b>Common layer.</b> Selecting a target you point or look at and confirming with a pinch or button works in every frame; we set it aside as a common layer.</p>
+  </div>
+
+  <div class="tpage" id="tpage1">
+    <div class="script"><span class="say">read aloud</span><br>
+    Here is the grid, colored by what the worn inertial sensors can deliver on their own. Click the picture to enlarge it.</div>
+    <img class="grid-fig" src="everyweAR-Material/design-space-recolor.png" alt="The EveryweAR design space grid, five frames by three commitments, colored by the inertial frontier">
+    <div class="legend">
+      <span class="swatch sw-blue"></span><div><b>Blue</b>: the body's own pose, known from within, drift-free, deliverable today with no external fix.</div>
+      <span class="swatch sw-gradient"></span><div><b>Gradient</b> (Head track, Head anchor): the wearer's own position in the world, integrated from motion, drifts, holds as long as an occasional fix arrests it.</div>
+      <span class="swatch sw-purple"></span><div><b>Purple</b>: what the world contains and where other people are; imported by a scan or shared setup, then held.</div>
+    </div>
+    <div class="fac"><b>Say once, pointing at the Head column:</b> "orientation is blue, position is the gradient: a panel that turns with your head is free, a panel that stays where you stood costs a fix."</div>
+  </div>
+
+  <div class="tpage" id="tpage2">
+    <div class="script"><span class="say">read aloud</span><br>
+    One rule follows from the coloring.</div>
+    <div class="rule">Place each interaction at the innermost frame that holds it, and spend the external fix only where content must bind to the world or to others.</div>
+  </div>
+
+  <div class="tpage" id="tpage3">
+    <div class="script"><span class="say">ask</span><br>
+    Two warm-ups before we go back to your design. Where would you place: <b>a head nod that dismisses a notification?</b> And: <b>a note pinned to a door?</b></div>
+    <div class="fac"><b>Answers:</b> head nod = Head × Trigger (<span class="blue">blue</span>) · door note = +Scene × Anchor (<span class="purple">purple</span>). Correct both before proceeding.
+      <div style="margin-top:8px">Corrections needed: <input type="number" id="warmfix" min="0" max="9" style="width:70px;display:inline-block" oninput="saveMisc()"> <span style="margin-left:8px">more than 2 = tutorial too dense; log it.</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ STEP 3 · 1b REDO WITH THE SPACE ============ -->
+<section class="step" id="s3">
+  <h2>Part 2 · Your design, with the grid <span style="color:var(--muted);font-size:16px">(15 min)</span></h2>
+  <div class="script"><span class="say">read aloud</span><br>
+  Here are your five answers from before, with the grid beside them. For each one: click the cell where the interaction lives, tell me whether it needs no fix, an occasional fix, or a setup or scan, and tell me whether you would now change the design, and why. The grid shows the color of the cell you picked; nothing here is marked right or wrong.</div>
+
+  <img class="grid-fig" src="everyweAR-Material/design-space-recolor.png" alt="The EveryweAR design space grid, five frames by three commitments, colored by the inertial frontier">
+  <div class="legend">
+    <span class="swatch sw-blue"></span><div><b>Blue</b>: the body's own pose, known from within, no external fix.</div>
+    <span class="swatch sw-gradient"></span><div><b>Gradient</b>: the wearer's own position in the world, holds with an occasional fix.</div>
+    <span class="swatch sw-purple"></span><div><b>Purple</b>: what the world contains and where other people are, imported by a scan or shared setup.</div>
+  </div>
+  <div class="subnav"><span class="cardmeta">Cell picker for the highlighted row (click a row to select it first)</span></div>
+  <div class="pickgrid" id="redogrid"></div>
+  <div id="redolist"></div>
+
+  <div class="qa"><div class="q">Which of these changes would you not have made without the grid?</div>
+    <textarea id="ar_unprompted" oninput="saveAfterRefl()" placeholder="in the expert's words"></textarea></div>
+  <div class="qa"><div class="q">The grid changed how I decide what sensing an interaction needs.</div>
+    <div class="likert" id="likert"><span class="end">strongly disagree</span></div></div>
+
+  <div class="fac"><b>Never say right or wrong.</b> Each row records the expert's fix call; the expected call by cell color (blue = none, gradient = occasional, purple = setup) is computed only in the export and in the log below. A mismatch is the moment to probe once ("what would the system need to know there?"), not to correct. Type the why in the expert's words.</div>
+  <div class="fac" id="redolog"></div>
+</section>
+
+<!-- ============ STEP 4 · DEMOS ============ -->
+<section class="step" id="s4">
+  <h2>What we built <span style="color:var(--muted);font-size:16px">(8 min)</span></h2>
+  <div class="script"><span class="say">read aloud</span><br>
+  Five applications, all running live on glasses, watch, and phone, no camera during use. Each caption names the cells it occupies. After each one, tell me whether it is something you would have thought of. At the end: what is missing from this set?</div>
+  <div id="demolist"></div>
+  <div class="qa"><div class="q">What is missing from this set?</div>
+    <textarea id="demo_missing" oninput="saveDemos()" placeholder="in the expert's words"></textarea></div>
+  <div class="fac"><b>Timing (measured):</b> navigator 21 s · gaming 11 s · context-aware 31 s · teleparty 37 s · pace-partner 31 s ≈ 2.2 min of video. Narrate over each using its caption line. Tick "I would have thought of this" only when the expert says so unprompted or when asked directly; do not lead.</div>
+</section>
+
+<!-- ============ STEP 5 · FRONTIER CRITIQUE ============ -->
+<section class="step" id="s5">
+  <h2>The coloring <span style="color:var(--muted);font-size:16px">(17 min)</span></h2>
+  <div class="script"><span class="say">read aloud</span><br>
+  Now the grid on its own. Tell me any cell whose color you disagree with, and why. Be specific about what would have to be sensed.</div>
+  <img class="grid-fig" src="everyweAR-Material/design-space-recolor.png" alt="The EveryweAR design space grid, five frames by three commitments, colored by the inertial frontier">
+
+  <div class="subnav"><span class="cardmeta">Click the cell in question, then type the objection and the quantity it points to.</span></div>
+  <div class="pickgrid small" id="critgrid"></div>
+  <div class="subnav">
+    <span class="cardmeta" id="critstate">click a cell</span>
+    <span class="spacer"></span>
+    <button class="primary" onclick="addCrit()">add critique</button>
+  </div>
+  <table class="rowtable" id="crittable"></table>
+
+  <div class="fac"><b>Per critique, one follow-up:</b> "what would you need to see measured to accept it?" The quantity column holds that answer (a number, an error, a latency, a rate). Do not defend the coloring; take the objection down as stated.</div>
+
+  <h3>Open questions</h3>
+  <div class="qa"><div class="q">Is there an interaction native to inertial sensing that the grid has no place for?</div>
+    <textarea id="cr_noPlace" oninput="saveCritOpen()" placeholder="in the expert's words"></textarea></div>
+  <div class="qa"><div class="q">Where is the grid most useful?</div>
+    <textarea id="cr_mostUseful" oninput="saveCritOpen()" placeholder="in the expert's words"></textarea></div>
+  <div class="qa"><div class="q">Where is it least useful?</div>
+    <textarea id="cr_leastUseful" oninput="saveCritOpen()" placeholder="in the expert's words"></textarea></div>
+  <div class="qa"><div class="q">What would you rename or drop?</div>
+    <textarea id="cr_rename" oninput="saveCritOpen()" placeholder="in the expert's words"></textarea></div>
+</section>
+
+<!-- ============ STEP 6 · CLOSING ============ -->
+<section class="step" id="s6">
+  <h2>Closing <span style="color:var(--muted);font-size:16px">(5 min)</span></h2>
+  <div class="script"><span class="say">ask</span><br>
+  If you started an AR project tomorrow with this hardware, what from today would you carry into it? What would you ignore?</div>
+  <div class="qa"><div class="q">Carry</div>
+    <textarea id="cl_carry" oninput="saveClosing()" placeholder="in the expert's words"></textarea></div>
+  <div class="qa"><div class="q">Ignore</div>
+    <textarea id="cl_ignore" oninput="saveClosing()" placeholder="in the expert's words"></textarea></div>
+
+  <div class="fac"><b>After the session:</b> stop recording · <b>export the session below</b> · send $50 Tango · first-pass read of the before/after tables the same evening.
   <div class="subnav" style="margin-top:10px">
-    <button class="primary" onclick="exportSession()">⬇ export session (all tasks + demographics)</button>
+    <button class="primary" onclick="exportSession()">⬇ export session (everywear_session_&lt;id&gt;_&lt;date&gt;.json)</button>
     <button onclick="clearSession()" style="border-color:var(--fac-border);color:var(--fac-ink)">clear ALL (before a new session)</button>
   </div>
+  <div id="exportstate" style="margin-top:6px"></div>
   <textarea id="sessjson" style="display:none;width:100%;height:90px;font-size:11px"></textarea>
   </div>
-
-  <div class="fac"><details><summary><b>Prep reference (not session material — reporting plan, rubric, pilot watch-list, week plan)</b></summary>
-  <br><b>Reporting plan (§8):</b> T1 agreement (one number + per-axis breakdown) · T2 boundary cases (short prose) · T3 total proposals, count of (b) with a table of the best, count of (c) → discussion · T4 agreement with the feasibility table + one vivid quote. <b>Success bar:</b> every expert ≥1 category-(b); ≥8 distinct (b) across the panel = strong.
-  <br><br><b>T3 rubric</b> (two coders → consensus): (a) restatement, scenario reskin of our examples/demos, no credit · (b) NEW in-cell technique, new binding target / content role / mechanism, the headline count · (c) boundary product, fits no cell or strains an axis, discussion material.
-  <br><br><b>Pilot watch-list:</b> T3 yields (b)? (go/no-go) · card 7 vs trajectory separable? (ego-position line needs an example, not a definition) · &gt;2 comprehension corrections → cut the tutorial · over 75 min → T1 to 8 cards first · cards 6/8/9 composite fights → add a primary-rule example.
-  <br><br><b>Week plan:</b> Day 1 recruit (bottleneck) + book pilot · Day 2 pilot + same-day debrief → kit v3 freeze · Day 3 confirm slots · Days 4–6 two sessions/day, code same evening · Day 7 consensus coding, T1 agreement, draft §8 with real numbers.
-  </details></div>
 </section>
 
 </div>
 
 <script>
-const STEPS = ["Welcome","Tutorial","Check","T1 Classify","T2 Position","T3 Generate","Demos","T4 Probe","Wrap-up"];
-let cur = 0;
-
-const CARDS = [
- ["Taps on your own forearm and palm are detected by an armband, and each tap location triggers a different command.",
-  "<b>1 · Skinput</b> (Harrison 2010) → <b>+Arm × Trigger</b> <span class='blue'>blue</span>. Pair with #2: same act, different binding."],
- ["A depth camera projects buttons onto nearby walls and tables; tapping a projected button on the wall activates it.",
-  "<b>2 · OmniTouch</b> (Harrison 2011) → <b>+Scene × Trigger</b> <span class='purple'>purple</span>. Surface in the world → +Scene."],
- ["Your real arm's extension is amplified: as you reach past a threshold, your virtual hand extends non-linearly farther, letting you grab remote objects with continuous arm motion.",
-  "<b>3 · Go-Go</b> (Poupyrev 1996) → <b>+Arm × Track</b> <span class='blue'>blue</span>. Content = scaled extension of the arm."],
- ["A set of app windows is arranged around your torso at fixed body-relative positions; the layout stays with you as you walk and persists across sessions.",
-  "<b>4 · Personal Cockpit</b> (Ens 2014) → <b>+Body × Anchor</b> <span class='blue'>blue</span>."],
- ["Touches and swipes at fixed positions along your belt line fire discrete commands on your head-worn display.",
-  "<b>5 · Belt</b> (Dobbelstein 2015) → <b>+Body × Trigger</b> <span class='blue'>blue</span>."],
- ["A glance at the edge of your view summons a radial menu that appears fixed in your field of view; a further head tilt highlights a sector and dwelling on it confirms.",
-  "<b>6 · Radi-Eye</b> (Sidenmark 2021) → <b>Head × Trigger</b> <span class='blue'>blue</span>. Composite trigger+track; primary = trigger."],
- ["A view-fixed cursor follows your gaze continuously; small head movements refine the cursor position when gaze alone is too coarse.",
-  "<b>7 · BimodalGaze</b> (Sidenmark 2020) → <b>Head × Track</b> <span class='blue'>blue*</span>. View-locked orientation content = the drift-free instance of the cell; the figure shows the same cell's ego-position instance (trajectory), which rides the frontier. Watch whether the expert separates the two."],
- ["You point at a spot in the room and speak “put that there”; the object is placed at the indicated location and stays there.",
-  "<b>8 · Put-That-There</b> (Bolt 1980) → <b>+Scene × Anchor</b> <span class='purple'>purple</span>. Composite anchor+trigger; primary = anchor (tests the primary rule)."],
- ["Pointing at a physical object, a plant or a package, opens a small menu that attaches to the object and remains on it as you move around.",
-  "<b>9 · XR-Objects</b> (Dogan 2024) → <b>+Scene × Anchor</b> <span class='purple'>purple</span>. Composite anchor+trigger."],
- ["Your eye-gaze ray is continuously rendered into a co-located partner's view, so they always see where you are looking during a joint task.",
-  "<b>10 · Shared Gaze</b> (Rasch 2026) → <b>+Social × Track</b> <span class='purple'>purple</span>."],
- ["(Optional hard case.) You hold a miniature model of the room in your non-dominant hand and move furniture by picking up the miniature copies; the real-scale virtual furniture moves accordingly.",
-  "<b>11 · Worlds-in-Miniature</b> (Stoakley 1995) → <b>+Arm × Track</b> <span class='blue'>blue</span>. Hand-held proxy → +Arm; even our coders initially disagreed, expect discussion."]
-];
-let ci = 0;
-
-/* T1 clickable grid: consensus key as [frameIdx, commitIdx] per card */
+/* ---------- constants ---------- */
+const STEPS = ["Intro","1a Design","Tutorial","1b Redo","Demos","Critique","Closing"];
 const FRAMES = ['Head','+Arm','+Body','+Scene','+Social'];
 const COMMITS = ['Trigger','Track','Anchor'];
-const KEY = [[1,0],[3,0],[1,1],[2,2],[2,0],[0,0],[0,1],[3,2],[3,2],[4,1],[1,1]];
-let answers = JSON.parse(localStorage.getItem('ewar_t1') || '[]');
-let picked = null, picked2 = null;
+const NEEDS = {
+  A: ['starting and ending each set','seeing a rep count during a set','a stats panel to look at between sets while moving around',"following a friend's recorded run on the treadmill",'one more interaction of your choice'],
+  B: ['item info when near a shelf','turn-by-turn guidance to the next bay','hands-free confirmation of a pick','a persistent checkable pick list','one more interaction of your choice']
+};
+const BRIEFTEXT = {
+  A: '<b>Brief A · Gym training companion.</b> A user trains alone for 45 minutes. They need:',
+  B: '<b>Brief B · Warehouse picking assistant.</b> A worker picks items over a 2-hour shift. They need:'
+};
+const DEMOS = [
+  { key:'navigator', title:'Indoor Navigator', src:'videos/navigator.mp4',
+    cells:['Head × Trigger','Head × Track','+Scene × Anchor'],
+    narr:'Walking trigger reveals the panel; the floor path is anchored to the building by a one-time scan; rerouting when the elevator is out.' },
+  { key:'gaming', title:'AR Gaming', src:'videos/gaming.mp4',
+    cells:['+Arm × Track','+Arm × Trigger','+Social × Track'],
+    narr:"Arm-direction aiming, arm-pose firing; the opponent's health bar follows their body in a shared frame set by a common start." },
+  { key:'context-aware', title:'Context-Aware System', src:'videos/context-aware.mp4',
+    cells:['+Scene × Anchor','+Scene × Trigger','+Arm × Anchor','+Arm × Trigger'],
+    narr:"A printer's status panel is pinned to the machine and appears on approach; a grab copies progress to the wrist; a check-watch pose recalls it later." },
+  { key:'teleparty', title:'Tele-Party', src:'videos/teleparty.mp4',
+    cells:['+Scene × Anchor','+Social × Anchor','+Body × Trigger'],
+    narr:'A shared world-anchored screen both users see in the same spot; standing pauses playback, sitting resumes it.' },
+  { key:'pace-partner', title:'Pace Partner', src:'videos/pace-partner.mp4',
+    cells:['+Body × Anchor','Head × Track','+Social × Track'],
+    narr:"A body-anchored exercise panel that stays centered while running; the run is tracked along the wearer's own path; a friend's recorded run replays as a ghost in the shared frame." }
+];
 
+/* ---------- storage ---------- */
+const K = {
+  demo:'ewar3_demo', brief:'ewar3_brief', before:'ewar3_before', after:'ewar3_after',
+  afterRefl:'ewar3_afterReflection', demos:'ewar3_demos', crit:'ewar3_critique',
+  closing:'ewar3_closing', misc:'ewar3_misc'
+};
+function load(k, d){ try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch(e){ return d; } }
+function save(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} }
+
+let demo = load(K.demo, {});
+let brief = load(K.brief, null);
+let before = load(K.before, null);        // [{act, where, beyond}] x5
+let after = load(K.after, null);          // [{cell:[f,c]|null, call:'', changed:false, why:''}] x5
+let afterRefl = load(K.afterRefl, {unprompted:'', likert:null});
+let demos = load(K.demos, {thoughtOf:[], missing:''});
+let crit = load(K.crit, {cells:[], noPlace:'', mostUseful:'', leastUseful:'', rename:''});
+let closing = load(K.closing, {carry:'', ignore:''});
+let misc = load(K.misc, {warmfix:''});
+
+function blankBefore(){ return [0,1,2,3,4].map(()=>({act:'', where:'', beyond:''})); }
+function blankAfter(){ return [0,1,2,3,4].map(()=>({cell:null, call:'', changed:false, why:''})); }
+if (!before) before = blankBefore();
+if (!after) after = blankAfter();
+
+/* ---------- helpers ---------- */
+function cellName(a){ return a ? `${FRAMES[a[0]]} × ${COMMITS[a[1]]}` : ''; }
+function colorOf(a){
+  if (!a) return null;
+  if (a[0] >= 3) return 'purple';
+  if (a[0] === 0 && a[1] >= 1) return 'gradient';
+  return 'blue';
+}
+function expectedCall(a){ const c = colorOf(a); return c==='blue' ? 'none' : c==='gradient' ? 'occasional' : c==='purple' ? 'setup' : null; }
+function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function buildGridInto(id, pref, fn){
-  const g = document.getElementById(id);
+  const g = document.getElementById(id); if (!g) return;
   let h = '<div></div>' + FRAMES.map(f=>`<div class="hdr">${f}</div>`).join('');
   COMMITS.forEach((cm,c)=>{
     h += `<div class="rowl">${cm}</div>` + FRAMES.map((f,fi)=>
@@ -447,101 +468,222 @@ function buildGridInto(id, pref, fn){
   });
   g.innerHTML = h;
 }
-function buildGrid(){ buildGridInto('t1grid','pk','pick'); buildGridInto('t2grid','qk','pickT2'); buildGridInto('t4grid','rk','pickT4'); }
-function pick(f,c){
-  const two = document.getElementById('twofit').checked;
-  if (two && picked && !(picked[0]===f && picked[1]===c)) picked2 = [f,c];
-  else { picked = [f,c]; if (!two) picked2 = null; }
-  updateGrid();
-}
-function twofitChanged(){
-  if (!document.getElementById('twofit').checked) picked2 = null;
-  updateGrid();
-}
-function cellName(a){ return a ? `${FRAMES[a[0]]} × ${COMMITS[a[1]]}` : ''; }
-function updateGrid(){
+function buildGrid(){ buildGridInto('redogrid','rk','pickRedo'); buildGridInto('critgrid','ck','pickCrit'); }
+function markGrid(pref, sel){
   FRAMES.forEach((f,fi)=>COMMITS.forEach((cm,c)=>{
-    const el = document.getElementById(`pk${fi}_${c}`); if(!el) return;
-    el.classList.toggle('sel', !!picked && picked[0]===fi && picked[1]===c);
-    el.classList.toggle('sel2', !!picked2 && picked2[0]===fi && picked2[1]===c);
+    const el = document.getElementById(`${pref}${fi}_${c}`); if(!el) return;
+    el.classList.toggle('sel', !!sel && sel[0]===fi && sel[1]===c);
   }));
-  document.getElementById('pickstate').textContent =
-    picked ? ('picked: ' + cellName(picked) + (picked2 ? ' · also: ' + cellName(picked2) : '')) : 'click a cell';
 }
-function submitT1(){
-  if (!picked) { document.getElementById('pickstate').textContent = '← click a cell first'; return; }
-  answers[ci] = { p: picked, s: picked2 };
-  localStorage.setItem('ewar_t1', JSON.stringify(answers));
-  if (ci < CARDS.length - 1) ci++;
-  renderCard();
+
+/* ---------- demographics ---------- */
+const DFIELDS = ['df_id','df_role','df_years','df_focus','df_fam','df_fmt'];
+function saveDemo(){
+  const d = {}; DFIELDS.forEach(k => d[k.slice(3)] = document.getElementById(k).value);
+  demo = d; save(K.demo, d);
+  if (brief && defaultBrief() !== brief) {
+    const w = document.getElementById('briefwarn');
+    if (w) w.textContent = `Brief ${brief} is locked from the first 1a render; id ${demo.id} would default to ${defaultBrief()}. Override on the 1a page if that is intended.`;
+  } else { const w = document.getElementById('briefwarn'); if (w) w.textContent = ''; }
 }
-function renderT1Log(){
-  const rows = answers.map((a,i)=>{
-    if (!a) return '';
-    const k = KEY[i];
-    const exact = a.p[0]===k[0] && a.p[1]===k[1];
-    const fOnly = a.p[0]===k[0], cOnly = a.p[1]===k[1];
-    const mark = exact ? '✓ exact' : (fOnly ? 'frame ✓' : (cOnly ? 'commit ✓' : '✗'));
-    return `<tr><th>${i+1}</th><td>${cellName(a.p)}${a.s?' (+ '+cellName(a.s)+')':''}</td><td>${cellName(k)}</td><td>${mark}</td></tr>`;
+function loadDemo(){
+  DFIELDS.forEach(k => { const el = document.getElementById(k); if (el && demo[k.slice(3)] !== undefined) el.value = demo[k.slice(3)]; });
+}
+function defaultBrief(){
+  const id = (demo.id || '');
+  const m = id.match(/(\d+)/);
+  if (!m) return 'A';
+  return (+m[1]) % 2 === 1 ? 'A' : 'B';
+}
+function applyDefaultBrief(){ renderBrief(); }
+
+/* ---------- 1a ---------- */
+function setBrief(x){ brief = x; save(K.brief, x); renderBrief(); }
+function renderBrief(){
+  if (!brief) { brief = defaultBrief(); save(K.brief, brief); }
+  const b = brief;
+  document.querySelectorAll('input[name=brief]').forEach(r => r.checked = (r.value === b));
+  const st = document.getElementById('briefstate');
+  if (st) st.textContent = `brief ${b} (locked at first 1a render from id ${demo.id || 'unset'}; click to override, 1a notes stay in place)`;
+  const card = document.getElementById('briefcard');
+  if (card) card.innerHTML = BRIEFTEXT[b] + '<ol>' + NEEDS[b].map(n=>`<li>${n}</li>`).join('') + '</ol>';
+  renderBefore();
+}
+function currentBrief(){ return brief || defaultBrief(); }
+function renderBefore(){
+  const t = document.getElementById('beforetable'); if (!t) return;
+  const b = currentBrief();
+  t.innerHTML = '<tr><th style="width:22%">Need</th><th>What the user does</th><th>Where the content lives</th><th>What is needed beyond the worn inertial sensors</th></tr>' +
+    NEEDS[b].map((n,i)=>`<tr>
+      <td class="need">${i+1} · ${n}</td>
+      <td><textarea oninput="setBefore(${i},'act',this.value)">${esc(before[i].act)}</textarea></td>
+      <td><textarea oninput="setBefore(${i},'where',this.value)">${esc(before[i].where)}</textarea></td>
+      <td><textarea oninput="setBefore(${i},'beyond',this.value)">${esc(before[i].beyond)}</textarea></td></tr>`).join('');
+}
+function setBefore(i, k, v){ before[i][k] = v; save(K.before, before); }
+
+/* ---------- tutorial ---------- */
+let tp = 0;
+function tpage(i){ tp = i;
+  [0,1,2,3].forEach(j => { document.getElementById('tpage'+j).classList.toggle('show', j===i);
+    document.getElementById('tp'+j).classList.toggle('primary', j===i); });
+}
+function saveMisc(){ misc.warmfix = document.getElementById('warmfix').value; save(K.misc, misc); }
+
+/* ---------- 1b ---------- */
+let redoRow = 0;
+function selectRow(i){ redoRow = i; renderRedo(); }
+function pickRedo(f,c){ after[redoRow].cell = [f,c]; save(K.after, after); renderRedo(); }
+function setAfter(i, k, v){ after[i][k] = v; save(K.after, after); renderRedo(false); }
+function renderRedo(full=true){
+  markGrid('rk', after[redoRow].cell);
+  const list = document.getElementById('redolist'); if (!list) return;
+  const b = currentBrief();
+  if (full) {
+    list.innerHTML = NEEDS[b].map((n,i)=>{
+      const a = after[i], bf = before[i];
+      const col = colorOf(a.cell);
+      return `<div class="redo ${i===redoRow?'open':''}" onclick="if(event.target.tagName!=='TEXTAREA'&&event.target.tagName!=='INPUT'&&event.target.tagName!=='LABEL')selectRow(${i})">
+        <div class="need">${i+1} · ${n}</div>
+        <div class="meta">${bf.act?'<b>does:</b> '+esc(bf.act)+' · ':''}${bf.where?'<b>lives:</b> '+esc(bf.where)+' · ':''}${bf.beyond?'<b>beyond:</b> '+esc(bf.beyond):''}${(!bf.act&&!bf.where&&!bf.beyond)?'(no notes from Part 1)':''}</div>
+        <div class="cellline"><span class="swatch ${col?'sw-'+col:'sw-none'}"></span>${a.cell ? cellName(a.cell) : '<span style="color:var(--muted)">no cell yet: select this row, then click the grid</span>'}</div>
+        <div class="fields">
+          <div class="radios"><div style="color:var(--muted);margin-bottom:2px">fix call</div>
+            <label><input type="radio" name="call${i}" value="none" ${a.call==='none'?'checked':''} onchange="setAfter(${i},'call','none')"> none</label>
+            <label><input type="radio" name="call${i}" value="occasional" ${a.call==='occasional'?'checked':''} onchange="setAfter(${i},'call','occasional')"> occasional fix</label>
+            <label><input type="radio" name="call${i}" value="setup" ${a.call==='setup'?'checked':''} onchange="setAfter(${i},'call','setup')"> setup or scan</label>
+          </div>
+          <div>
+            <label><input type="checkbox" ${a.changed?'checked':''} onchange="setAfter(${i},'changed',this.checked)"> design changed</label>
+            <div style="color:var(--muted);margin:6px 0 2px">why</div>
+            <textarea oninput="setAfter(${i},'why',this.value)">${esc(a.why)}</textarea>
+          </div>
+        </div></div>`;
+    }).join('');
+  } else {
+    document.querySelectorAll('#redolist .redo').forEach((el,i)=>{
+      const sw = el.querySelector('.swatch'); const col = colorOf(after[i].cell);
+      sw.className = 'swatch ' + (col?'sw-'+col:'sw-none');
+    });
+  }
+  renderRedoLog();
+}
+function renderRedoLog(){
+  const log = document.getElementById('redolog'); if (!log) return;
+  const b = currentBrief();
+  const rows = NEEDS[b].map((n,i)=>{
+    const a = after[i]; const exp = expectedCall(a.cell);
+    const ok = a.cell && a.call ? (a.call===exp ? '✓' : '✗ probe') : '';
+    return `<tr><th>${i+1}</th><td>${a.cell?cellName(a.cell):''}</td><td>${a.call||''}</td><td>${exp||''}</td><td>${ok}</td><td>${a.changed?'yes':''}</td></tr>`;
   }).join('');
-  const done = answers.filter(Boolean);
-  const nx = done.filter((a,i)=>a.p[0]===KEY[i][0]&&a.p[1]===KEY[i][1]).length;
-  const nf = done.filter((a,i)=>a.p[0]===KEY[i][0]).length;
-  const nc = done.filter((a,i)=>a.p[1]===KEY[i][1]).length;
-  document.getElementById('t1log').innerHTML = done.length ?
-    `<b>Live log (facilitator only):</b><table><tr><th>#</th><th>expert</th><th>consensus</th><th>match</th></tr>${rows}</table>
-     exact ${nx}/${done.length} · frame ${nf}/${done.length} · commitment ${nc}/${done.length}`
-    : '<b>Live log (facilitator only):</b> no answers yet.';
+  const scored = after.filter(a=>a.cell&&a.call);
+  const match = scored.filter(a=>a.call===expectedCall(a.cell)).length;
+  log.innerHTML = `<b>Facilitator log (expected call by color; export carries the same):</b>
+    <table><tr><th>#</th><th>cell</th><th>expert call</th><th>expected</th><th>match</th><th>changed</th></tr>${rows}</table>
+    match ${match}/${scored.length} · changed ${after.filter(a=>a.changed).length}/5`;
+}
+function saveAfterRefl(){ afterRefl.unprompted = document.getElementById('ar_unprompted').value; save(K.afterRefl, afterRefl); }
+function setLikert(v){ afterRefl.likert = v; save(K.afterRefl, afterRefl); renderLikert(); }
+function renderLikert(){
+  const el = document.getElementById('likert'); if (!el) return;
+  el.innerHTML = '<span class="end">strongly disagree</span>' +
+    [1,2,3,4,5,6,7].map(v=>`<label class="${afterRefl.likert===v?'on':''}" onclick="setLikert(${v})">${v}</label>`).join('') +
+    '<span class="end">strongly agree</span>';
+  const ta = document.getElementById('ar_unprompted'); if (ta && ta.value !== afterRefl.unprompted) ta.value = afterRefl.unprompted;
 }
 
-/* T2 positioning state */
-let t2 = JSON.parse(localStorage.getItem('ewar_t2') || '{"pl":[],"bd":[]}');
-let t2sel = null;
-function pickT2(f,c){ t2sel = [f,c]; updateT2Grid(); }
-function updateT2Grid(){
-  FRAMES.forEach((f,fi)=>COMMITS.forEach((cm,c)=>{
-    const el = document.getElementById(`qk${fi}_${c}`); if(!el) return;
-    el.classList.toggle('sel', !!t2sel && t2sel[0]===fi && t2sel[1]===c);
-  }));
-  document.getElementById('t2state').textContent =
-    t2sel ? 'cell: ' + cellName(t2sel) : 'type a name, then click its cell';
+/* ---------- demos ---------- */
+function renderDemos(){
+  const list = document.getElementById('demolist'); if (!list) return;
+  list.innerHTML = DEMOS.map(d=>`<div class="vid"><h3>${d.title}</h3>
+    <video controls preload="metadata" src="${d.src}"></video>
+    <div class="cells">${d.cells.map(c=>`<span>${c}</span>`).join('')}</div>
+    <p class="narr">${d.narr}</p>
+    <label class="thought"><input type="checkbox" ${demos.thoughtOf.includes(d.key)?'checked':''} onchange="toggleThought('${d.key}',this.checked)"> I would have thought of this</label>
+  </div>`).join('');
+  const ta = document.getElementById('demo_missing'); if (ta) ta.value = demos.missing || '';
 }
-function saveT2(){ localStorage.setItem('ewar_t2', JSON.stringify(t2)); renderT2(); }
-function addT2(){
-  const inp = document.getElementById('t2name'), name = inp.value.trim();
-  if (!name) { document.getElementById('t2state').textContent = '← type the technique name first'; return; }
-  if (!t2sel) { document.getElementById('t2state').textContent = 'click the cell it lives in'; return; }
-  t2.pl.push({ n: name, c: t2sel });
-  inp.value = ''; t2sel = null; updateT2Grid(); saveT2();
+function toggleThought(k, on){
+  demos.thoughtOf = demos.thoughtOf.filter(x=>x!==k);
+  if (on) demos.thoughtOf.push(k);
+  demos.thoughtOf = DEMOS.map(d=>d.key).filter(x=>demos.thoughtOf.includes(x));
+  save(K.demos, demos);
 }
-function noFitOpen(){ const b = document.getElementById('nofitbox'); b.style.display = 'block';
-  document.getElementById('nofittext').focus(); }
-function saveNoFit(){
-  const t = document.getElementById('nofittext'), v = t.value.trim();
-  if (!v) return;
-  t2.bd.push({ n: v });
-  t.value = ''; document.getElementById('nofitbox').style.display = 'none'; saveT2();
+function saveDemos(){ demos.missing = document.getElementById('demo_missing').value; save(K.demos, demos); }
+
+/* ---------- critique ---------- */
+let critSel = null;
+function pickCrit(f,c){ critSel = [f,c]; markGrid('ck', critSel);
+  document.getElementById('critstate').textContent = 'cell: ' + cellName(critSel); }
+function addCrit(){
+  if (!critSel) { document.getElementById('critstate').textContent = 'click a cell first'; return; }
+  crit.cells.push({cell:cellName(critSel), objection:'', quantity:''});
+  critSel = null; markGrid('ck', null);
+  document.getElementById('critstate').textContent = 'click a cell';
+  save(K.crit, crit); renderCrit();
+  const tas = document.querySelectorAll('#crittable textarea'); if (tas.length) tas[tas.length-2].focus();
 }
-function rmT2(kind, i){ t2[kind].splice(i,1); saveT2(); }
-function renderT2(){
-  const list = document.getElementById('t2list'); if (!list) return;
-  list.innerHTML =
-    t2.pl.map((p,i)=>`<div class="placed">${i+1}. <b>${p.n}</b> → ${cellName(p.c)} <button onclick="rmT2('pl',${i})" title="remove">✕</button></div>`).join('') +
-    t2.bd.map((b,i)=>`<div class="placed bd">⚑ fits nowhere: “${b.n}” <button onclick="rmT2('bd',${i})" title="remove">✕</button></div>`).join('');
-  const log = document.getElementById('t2log'); if (!log) return;
-  log.innerHTML = `<b>T2 log:</b> ${t2.pl.length} placement(s), ${t2.bd.length} boundary finding(s). Export lives at the Wrap-up step.`;
+function setCrit(i, k, v){ crit.cells[i][k] = v; save(K.crit, crit); }
+function rmCrit(i){ crit.cells.splice(i,1); save(K.crit, crit); renderCrit(); }
+function renderCrit(){
+  const t = document.getElementById('crittable'); if (!t) return;
+  if (!crit.cells.length) { t.innerHTML = ''; return; }
+  t.innerHTML = '<tr><th style="width:18%">Cell</th><th>Objection</th><th>Quantity it points to</th><th></th></tr>' +
+    crit.cells.map((c,i)=>`<tr>
+      <td class="need">${c.cell}</td>
+      <td><textarea oninput="setCrit(${i},'objection',this.value)">${esc(c.objection)}</textarea></td>
+      <td><textarea oninput="setCrit(${i},'quantity',this.value)">${esc(c.quantity)}</textarea></td>
+      <td><button class="rm" onclick="rmCrit(${i})" title="remove">✕</button></td></tr>`).join('');
+}
+const CROPEN = ['noPlace','mostUseful','leastUseful','rename'];
+function saveCritOpen(){ CROPEN.forEach(k => crit[k] = document.getElementById('cr_'+k).value); save(K.crit, crit); }
+function loadCritOpen(){ CROPEN.forEach(k => { const el = document.getElementById('cr_'+k); if (el) el.value = crit[k] || ''; }); }
+
+/* ---------- closing + export ---------- */
+function saveClosing(){ closing.carry = document.getElementById('cl_carry').value; closing.ignore = document.getElementById('cl_ignore').value; save(K.closing, closing); }
+function loadClosing(){ document.getElementById('cl_carry').value = closing.carry || ''; document.getElementById('cl_ignore').value = closing.ignore || ''; }
+function exportSession(){
+  const b = currentBrief();
+  const data = {
+    kitVersion: 'v3',
+    exported: new Date().toISOString(),
+    demographics: { id: demo.id||'', role: demo.role||'', years: demo.years||'', focus: demo.focus||'', fam: demo.fam||'', fmt: demo.fmt||'' },
+    brief: b,
+    before: NEEDS[b].map((n,i)=>({ need:n, act:before[i].act||'', where:before[i].where||'', beyond:before[i].beyond||'' })),
+    after: NEEDS[b].map((n,i)=>({ need:n, cell: after[i].cell ? cellName(after[i].cell) : '', call: after[i].call||'',
+      expected: expectedCall(after[i].cell) || '', changed: !!after[i].changed, why: after[i].why||'' })),
+    afterReflection: { unprompted: afterRefl.unprompted||'', likert: afterRefl.likert||null },
+    demos: { thoughtOf: demos.thoughtOf.slice(), missing: demos.missing||'' },
+    critique: { cells: crit.cells.map(c=>({cell:c.cell, objection:c.objection||'', quantity:c.quantity||''})),
+      noPlace: crit.noPlace||'', mostUseful: crit.mostUseful||'', leastUseful: crit.leastUseful||'', rename: crit.rename||'' },
+    closing: { carry: closing.carry||'', ignore: closing.ignore||'' }
+  };
+  const id = (data.demographics.id || 'X').replace(/\W+/g,'');
+  const day = data.exported.slice(0,10);
+  const txt = JSON.stringify(data, null, 1);
+  const blob = new Blob([txt], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = `everywear_session_${id}_${day}.json`; a.click();
+  const ta = document.getElementById('sessjson');
+  ta.style.display = 'block'; ta.value = txt;
+  let copied = false;
+  if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(txt).then(()=>{ document.getElementById('exportstate').textContent = 'downloaded + copied to clipboard'; }).catch(()=>{}); }
+  else { ta.select(); try { copied = document.execCommand('copy'); } catch(e) {} document.getElementById('exportstate').textContent = copied ? 'downloaded + copied to clipboard' : 'downloaded; copy the JSON below by hand'; }
+}
+function clearSession(){
+  if (!confirm('Clear ALL session data (demographics, 1a, 1b, demos, critique, closing)? Export first!')) return;
+  Object.values(K).forEach(k=>{ try { localStorage.removeItem(k); } catch(e){} });
+  demo = {}; brief = null; before = blankBefore(); after = blankAfter();
+  afterRefl = {unprompted:'', likert:null}; demos = {thoughtOf:[], missing:''};
+  crit = {cells:[], noPlace:'', mostUseful:'', leastUseful:'', rename:''}; closing = {carry:'', ignore:''}; misc = {warmfix:''};
+  redoRow = 0; critSel = null; tp = 0;
+  DFIELDS.forEach(k => { const el = document.getElementById(k); if (el) el.value = ''; });
+  document.getElementById('sessjson').style.display = 'none'; document.getElementById('exportstate').textContent = '';
+  go(0);
 }
 
-const PROMPTS = [
- ["<b>Prompt 1 · the empty cell: +SOCIAL × ANCHOR.</b><br>In our corpus of 133 published techniques, no one occupies this cell: content that persists in a frame you share with another person, pinned on them, or placed where you both must see it in the same spot. What would you build here?",
-  "If the expert offers Pokémon-Go-style content: apply the tutorial test, no shared frame with a particular person required → +Scene. <b>Record the exchange, it is distinctness data.</b>"],
- ["<b>Prompt 2 · the sparse cell: +BODY × ANCHOR.</b><br>Only five published techniques live here. Beyond a torso-locked panel, what else could be anchored to the body?",
-  "Push once: “what else?” Then move on."],
- ["<b>Prompt 3 · free choice.</b><br>Pick any cell you find most interesting or underexplored, and design something new for it.",
-  "Record which cell they choose; the choice is itself data on where the space feels open."]
-];
-let pi = 0;
-
+/* ---------- navigation ---------- */
+let cur = 0;
 function render() {
   document.querySelectorAll('.step').forEach((s,i)=>s.classList.toggle('show', i===cur));
   const pills = document.getElementById('pills');
@@ -552,149 +694,23 @@ function render() {
   nav.innerHTML = (cur>0?`<button onclick="go(${cur-1})">◀ back</button>`:'') +
     (cur<STEPS.length-1?`<button class="primary" onclick="go(${cur+1})">continue ▶</button>`:'');
   document.getElementById('s'+cur).appendChild(nav);
-  if (cur===3) renderCard();
-  if (cur===4) { updateT2Grid(); renderT2(); }
-  if (cur===5) renderPrompt();
-  if (cur===7) { if (t4.brief) brief(t4.brief); updateT4Grid(); renderT4(); }
-  if (cur===8) loadDemo();
+  if (cur===0) loadDemo();
+  if (cur===1) renderBrief();
+  if (cur===2) { tpage(tp); document.getElementById('warmfix').value = misc.warmfix || ''; }
+  if (cur===3) { renderRedo(); renderLikert(); }
+  if (cur===4) renderDemos();
+  if (cur===5) { markGrid('ck', critSel); renderCrit(); loadCritOpen(); }
+  if (cur===6) loadClosing();
 }
 function go(i){ cur=i; render(); }
-function card(d){ ci=Math.min(CARDS.length-1, Math.max(0, ci+d)); renderCard(); }
-function renderCard(){
-  document.getElementById('cardbox').innerHTML = CARDS[ci][0];
-  document.getElementById('cardnum').textContent = `card ${ci+1} of 10` + (ci===10?' (optional, skip if short on time)':'');
-  document.getElementById('cardkey').innerHTML = CARDS[ci][1];
-  const a = answers[ci];
-  picked = a ? a.p : null; picked2 = a ? (a.s || null) : null;
-  document.getElementById('twofit').checked = !!picked2;
-  updateGrid(); renderT1Log();
-}
-function prompt3(d){ pi=Math.min(PROMPTS.length-1, Math.max(0, pi+d)); renderPrompt(); }
-function renderPrompt(){
-  document.getElementById('promptbox').innerHTML = PROMPTS[pi][0];
-  document.getElementById('promptnum').textContent = `prompt ${pi+1} of 3`;
-  document.getElementById('promptfac').innerHTML = PROMPTS[pi][1];
-  renderT3();
-}
-
-/* T3 proposal log */
-const PROMPTTAG = ['P1 +Social×Anchor', 'P2 +Body×Anchor', 'P3 free choice'];
-let t3 = JSON.parse(localStorage.getItem('ewar_t3') || '[]');
-function addT3(){
-  const inp = document.getElementById('t3name'), v = inp.value.trim();
-  if (!v) return;
-  t3.push({ p: pi, n: v });
-  inp.value = '';
-  localStorage.setItem('ewar_t3', JSON.stringify(t3)); renderT3();
-}
-function rmT3(i){ t3.splice(i,1); localStorage.setItem('ewar_t3', JSON.stringify(t3)); renderT3(); }
-function renderT3(){
-  const list = document.getElementById('t3list'); if (!list) return;
-  list.innerHTML = t3.map((x,i)=>`<div class="placed">${i+1}. [${PROMPTTAG[x.p]}] <b>${x.n}</b> <button onclick="rmT3(${i})" title="remove">✕</button></div>`).join('');
-  const log = document.getElementById('t3log'); if (!log) return;
-  log.innerHTML = `<b>T3 log:</b> ${t3.length} proposal(s) noted. Export lives at the Wrap-up step.`;
-}
-/* T4 design probe */
-const REQS = {
-  A: ['start/stop sets','rep count display','stats panel while moving',"friend's recorded run",'extra idea'],
-  B: ['item info near shelf','turn-by-turn guidance','hands-free pick confirmation','persistent checkable list','extra idea'],
-};
-let t4 = JSON.parse(localStorage.getItem('ewar_t4') || '{"brief":null,"items":[]}');
-let t4sel = null;
-function brief(x){
-  document.getElementById('briefA').classList.toggle('show', x==='A');
-  document.getElementById('briefB').classList.toggle('show', x==='B');
-  document.getElementById('bA').style.fontWeight = x==='A'?'700':'400';
-  document.getElementById('bB').style.fontWeight = x==='B'?'700':'400';
-  t4.brief = x; localStorage.setItem('ewar_t4', JSON.stringify(t4));
-  document.getElementById('t4req').innerHTML =
-    REQS[x].map((r,i)=>`<option value="${i}">${r}</option>`).join('');
-  document.getElementById('t4state').textContent = 'type the interaction, click its cell';
-}
-function pickT4(f,c){ t4sel=[f,c]; updateT4Grid(); }
-function needsFix(a){ return a[0]>=3 || (a[0]===0 && a[1]>=1); }
-function updateT4Grid(){
-  FRAMES.forEach((f,fi)=>COMMITS.forEach((cm,c)=>{
-    const el = document.getElementById(`rk${fi}_${c}`); if(!el) return;
-    el.classList.toggle('sel', !!t4sel && t4sel[0]===fi && t4sel[1]===c);
-  }));
-  if (t4sel) document.getElementById('t4state').textContent = 'cell: ' + cellName(t4sel);
-}
-function addT4(){
-  const inp = document.getElementById('t4name'), v = inp.value.trim();
-  if (!t4.brief) { document.getElementById('t4state').textContent = 'pick Brief A or B first'; return; }
-  if (!v) { document.getElementById('t4state').textContent = '← type the interaction first'; return; }
-  if (!t4sel) { document.getElementById('t4state').textContent = 'click the cell it lives in'; return; }
-  t4.items.push({ n:v, r:+document.getElementById('t4req').value, c:t4sel,
-                  fix: document.getElementById('t4fix').checked,
-                  why: document.getElementById('t4why').value.trim() || null });
-  inp.value=''; document.getElementById('t4why').value=''; t4sel=null; document.getElementById('t4fix').checked=false;
-  localStorage.setItem('ewar_t4', JSON.stringify(t4)); updateT4Grid(); renderT4();
-}
-function rmT4(i){ t4.items.splice(i,1); localStorage.setItem('ewar_t4', JSON.stringify(t4)); renderT4(); }
-function renderT4(){
-  const list = document.getElementById('t4list'); if (!list) return;
-  const B = t4.brief;
-  list.innerHTML = t4.items.map((x,i)=>
-    `<div class="placed">${i+1}. [${B?REQS[B][x.r]:'?'}] <b>${x.n}</b> → ${cellName(x.c)}${x.fix?' · spends fix':''}${x.why?' · “'+x.why+'”':''} <button onclick="rmT4(${i})" title="remove">✕</button></div>`).join('');
-  const log = document.getElementById('t4log'); if (!log) return;
-  if (!t4.items.length) { log.innerHTML = '<b>T4 log:</b> nothing recorded yet.'; return; }
-  const rows = t4.items.map((x,i)=>{
-    const exp = needsFix(x.c), ok = (x.fix===exp);
-    return `<tr><th>${i+1}</th><td>${x.n}</td><td>${cellName(x.c)}</td><td>${x.fix?'fix':'no fix'}</td><td>${exp?'fix':'no fix'}</td><td>${ok?'✓':'✗ probe'}</td></tr>`;
-  }).join('');
-  const nok = t4.items.filter(x=>x.fix===needsFix(x.c)).length;
-  log.innerHTML = `<b>T4 log (brief ${t4.brief||'?'}):</b>
-    <table><tr><th>#</th><th>interaction</th><th>cell</th><th>expert call</th><th>cell's coloring</th><th>match</th></tr>${rows}</table>
-    blue/purple calls correct: ${nok}/${t4.items.length}`;
-}
-
-/* demographics + session export */
-const DFIELDS = ['df_id','df_role','df_years','df_focus','df_fam','df_fmt'];
-function saveDemo(){
-  const d = {}; DFIELDS.forEach(k => d[k.slice(3)] = document.getElementById(k).value);
-  localStorage.setItem('ewar_demo', JSON.stringify(d));
-}
-function loadDemo(){
-  const d = JSON.parse(localStorage.getItem('ewar_demo') || '{}');
-  DFIELDS.forEach(k => { const el = document.getElementById(k); if (el && d[k.slice(3)] !== undefined) el.value = d[k.slice(3)]; });
-}
-function exportSession(){
-  const done = answers.filter(Boolean);
-  const data = {
-    exported: new Date().toISOString(),
-    demographics: JSON.parse(localStorage.getItem('ewar_demo') || '{}'),
-    t1: { answers: answers.map((a,i)=>a&&({card:i+1, expert:cellName(a.p), second:a.s?cellName(a.s):null, consensus:cellName(KEY[i])})).filter(Boolean),
-          agreement: { exact: done.filter((a,i)=>a.p[0]===KEY[answers.indexOf(a)]?.[0]&&a.p[1]===KEY[answers.indexOf(a)][1]).length,
-                       n: done.length } },
-    t2: { placements: t2.pl.map(p=>({name:p.n, cell:cellName(p.c)})), boundaries: t2.bd.map(b=>b.n) },
-    t3: t3.map((x,i)=>({idx:i+1, prompt:PROMPTTAG[x.p], label:x.n})),
-    t4: { brief: t4.brief, items: t4.items.map(x=>({need: t4.brief?REQS[t4.brief][x.r]:null,
-          interaction:x.n, cell:cellName(x.c), expertFix:x.fix, cellExpectsFix:needsFix(x.c), why:x.why||null})) },
-  };
-  const id = (data.demographics.id || 'X').replace(/\W+/g,'');
-  const day = data.exported.slice(0,10);
-  const blob = new Blob([JSON.stringify(data, null, 1)], {type:'application/json'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob); a.download = `everywear_session_${id}_${day}.json`; a.click();
-  const ta = document.getElementById('sessjson');
-  ta.style.display = 'block'; ta.value = JSON.stringify(data);
-  ta.select(); try { document.execCommand('copy'); } catch(e) {}
-}
-function clearSession(){
-  if (!confirm('Clear ALL session data (T1–T4 + demographics)? Export first!')) return;
-  ['ewar_t1','ewar_t2','ewar_t3','ewar_t4','ewar_demo'].forEach(k=>localStorage.removeItem(k));
-  answers = []; t2 = {pl:[],bd:[]}; t3 = []; t4 = {brief:null,items:[]}; ci = 0; pi = 0;
-  picked = picked2 = t2sel = t4sel = null;
-  DFIELDS.forEach(k => { const el = document.getElementById(k); if (el) el.value = ''; });
-  go(0);
-}
 
 /* facilitator toggle */
 function setFac(on){ document.body.classList.toggle('fac-on', on); }
 document.getElementById('facbtn').onclick = ()=>setFac(!document.body.classList.contains('fac-on'));
 document.addEventListener('keydown', e=>{
-  if((e.metaKey||e.ctrlKey) && (e.key==='f'||e.key==='F')){
+  const tag = (e.target && e.target.tagName) || '';
+  const typing = tag==='INPUT' || tag==='TEXTAREA' || tag==='SELECT' || (e.target && e.target.isContentEditable);
+  if(!typing && !e.metaKey && !e.ctrlKey && !e.altKey && (e.key==='f'||e.key==='F')){
     e.preventDefault();
     setFac(!document.body.classList.contains('fac-on'));
   }
@@ -719,7 +735,7 @@ clock.onclick=()=>{
     clock.textContent=String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0'); },1000); }
 };
 
-const m = location.hash.match(/step(\d)/); if (m) cur = +m[1];
+const m = location.hash.match(/step(\d)/); if (m) cur = Math.min(STEPS.length-1, +m[1]);
 buildGrid();
 render();
 </script>
