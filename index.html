@@ -185,7 +185,7 @@
   <span id="pills"></span>
   <span class="spacer"></span>
   <span id="clock" title="click to start/pause">00:00</span>
-  <span class="pill" id="facbtn" title="toggle facilitator layer (or press F outside a text field, or open with #fac)">◐ facilitator</span>
+  <span class="pill" id="facbtn" title="toggle facilitator layer (or press Shift+F outside a text field, or open with #fac)">◐ facilitator</span>
 </div>
 
 <div class="wrap">
@@ -193,7 +193,7 @@
 <!-- ============ STEP 0 · INTRO ============ -->
 <section class="step" id="s0">
   <h1>EveryweAR: Expert Session</h1>
-  <p class="sans" style="color:var(--muted);font-size:14px">This page is the screen-share surface for the whole session. Participant-facing text is ready to read aloud; the orange facilitator layer stays hidden unless toggled (press F while no text field is focused, or open a private window with <code>#fac</code>).</p>
+  <p class="sans" style="color:var(--muted);font-size:14px">This page is the screen-share surface for the whole session. Participant-facing text is ready to read aloud; the orange facilitator layer stays hidden unless toggled (press Shift+F while no text field is focused, or open a private window with <code>#fac</code>).</p>
 
   <div class="script"><span class="say">read aloud</span><br>
   Thank you for joining. We are studying how designers make interaction decisions for AR glasses that have no camera during use. Over the next 75 minutes you will design for one scenario, twice, with a short tutorial in between; then you will see five things we built and tell us where you disagree with our map. There are no right answers; we want your reasoning aloud. We record audio and this screen. Any questions before we start?</div>
@@ -314,9 +314,14 @@
 <section class="step" id="s3">
   <h2>Part 2 · Your design, with the grid <span style="color:var(--muted);font-size:16px">(12 min)</span></h2>
   <div class="script"><span class="say">read aloud</span><br>
-  Here are your five answers from before, with the grid beside them. For each one: click the cell where the interaction lives, pick whether it needs no fix, an occasional fix, or a setup or scan, and type whether you would now change the design, and why. An interaction may pass through more than one cell, for example content pinned to a machine that you then copy to your wrist: click the cells in the order they happen, and click a cell again to remove it. The grid shows the color of what you picked; nothing here is marked right or wrong.</div>
+  Here are your five answers from before, with the grid beside them. For each one: click the cell where the interaction lives, say what the system needs beyond the worn sensors to keep the content where it belongs, and type whether you would now change the design, and why. An interaction may pass through more than one cell, for example content pinned to a machine that you then copy to your wrist: click the cells in the order they happen, and click a cell again to remove it. The grid shows the color of what you picked; nothing here is marked right or wrong.</div>
 
   <img class="grid-fig" src="everyweAR-Material/design-space-recolor.png" alt="The EveryweAR design space grid, five frames by three commitments, colored by the inertial frontier">
+  <div class="qa" style="margin-top:10px"><div class="q">What a fix means here</div>
+    <div style="font-size:15px;line-height:1.5">The worn inertial sensors always know the body's own pose. They do not know where the wearer is in the room, or where objects and other people are; that knowledge has to come from outside, and we call any such outside source a <b>fix</b>. Three answers per interaction:
+      <b>none</b> means the worn sensors alone keep the content where it belongs;
+      <b>occasional fix</b> means the wearer's own position has to be re-registered now and then, for example by a marker glanced at every minute or two, because it drifts in between;
+      <b>setup or scan</b> means the room or the object must be scanned once, or the two users must share a common start, before the content can be placed at all.</div></div>
   <div class="legend">
     <span class="swatch sw-blue"></span><div><b>Blue</b>: the body's own pose, known from within, no external fix.</div>
     <span class="swatch sw-gradient"></span><div><b>Gradient</b>: the wearer's own position in the world, holds with an occasional fix.</div>
@@ -350,7 +355,7 @@
 <section class="step" id="s5">
   <h2>Part 3 · An application of your own <span style="color:var(--muted);font-size:16px">(8 min)</span></h2>
   <div class="script"><span class="say">read aloud</span><br>
-  Same hardware: glasses with an inertial unit, no camera and no eye tracker during use, watch and phone optional, one setup step allowed. Pick an application from your own domain. Name it, then list three to five interactions. For each: type what the user does, click the cell or cells it passes through, and pick the fix call. Think aloud while you build.</div>
+  Same hardware: glasses with an inertial unit, no camera and no eye tracker during use, watch and phone optional, one setup step allowed. Pick an application from your own domain. Name it, then list three to five interactions. For each: type what the user does, click the cell or cells it passes through, and say what it needs beyond the worn sensors (none, an occasional fix, or a one-time setup or scan). Think aloud while you build.</div>
 
   <div class="qa"><div class="q">Application name and domain</div>
     <input id="fr_name" oninput="saveFreeMeta()" placeholder="e.g. museum guide for families" style="width:100%"></div>
@@ -362,9 +367,9 @@
   <div class="subnav">
     <span class="cardmeta" id="freestate">no cell yet</span>
     <span class="radios" style="margin-left:12px">
-      <label><input type="radio" name="frcall" value="none"> none</label>
-      <label><input type="radio" name="frcall" value="occasional"> occasional fix</label>
-      <label><input type="radio" name="frcall" value="setup"> setup or scan</label>
+      <label><input type="radio" name="frcall" value="none"> none: worn sensors alone</label>
+      <label><input type="radio" name="frcall" value="occasional"> occasional fix: re-register position now and then</label>
+      <label><input type="radio" name="frcall" value="setup"> setup or scan: scan once or share a common start</label>
     </span>
     <span class="spacer"></span>
     <button class="primary" onclick="addFree()">add interaction</button>
@@ -591,10 +596,10 @@ function renderRedo(full=true){
         <div class="meta">${bf.act?'<b>does:</b> '+esc(bf.act)+' · ':''}${bf.where?'<b>lives:</b> '+esc(bf.where)+' · ':''}${bf.beyond?'<b>beyond:</b> '+esc(bf.beyond):''}${(!bf.act&&!bf.where&&!bf.beyond)?'(no notes from Part 1)':''}</div>
         <div class="cellline"><span class="swatch ${col?'sw-'+col:'sw-none'}"></span>${a.cells.length ? chainName(a.cells) : '<span style="color:var(--muted)">no cell yet: select this row, then click the grid</span>'}</div>
         <div class="fields">
-          <div class="radios"><div style="color:var(--muted);margin-bottom:2px">fix call</div>
-            <label><input type="radio" name="call${i}" value="none" ${a.call==='none'?'checked':''} onchange="setAfter(${i},'call','none')"> none</label>
-            <label><input type="radio" name="call${i}" value="occasional" ${a.call==='occasional'?'checked':''} onchange="setAfter(${i},'call','occasional')"> occasional fix</label>
-            <label><input type="radio" name="call${i}" value="setup" ${a.call==='setup'?'checked':''} onchange="setAfter(${i},'call','setup')"> setup or scan</label>
+          <div class="radios"><div style="color:var(--muted);margin-bottom:2px">what the system needs beyond the worn sensors</div>
+            <label><input type="radio" name="call${i}" value="none" ${a.call==='none'?'checked':''} onchange="setAfter(${i},'call','none')"> none: worn sensors alone</label>
+            <label><input type="radio" name="call${i}" value="occasional" ${a.call==='occasional'?'checked':''} onchange="setAfter(${i},'call','occasional')"> occasional fix: re-register the wearer's position now and then</label>
+            <label><input type="radio" name="call${i}" value="setup" ${a.call==='setup'?'checked':''} onchange="setAfter(${i},'call','setup')"> setup or scan: scan the room or object once, or share a common start</label>
           </div>
           <div>
             <label><input type="checkbox" ${a.changed?'checked':''} onchange="setAfter(${i},'changed',this.checked)"> design changed</label>
@@ -824,7 +829,7 @@ document.getElementById('facbtn').onclick = ()=>setFac(!document.body.classList.
 document.addEventListener('keydown', e=>{
   const tag = (e.target && e.target.tagName) || '';
   const typing = tag==='INPUT' || tag==='TEXTAREA' || tag==='SELECT' || (e.target && e.target.isContentEditable);
-  if(!typing && !e.metaKey && !e.ctrlKey && !e.altKey && (e.key==='f'||e.key==='F')){
+  if(!typing && e.shiftKey && !e.metaKey && !e.ctrlKey && !e.altKey && (e.key==='F'||e.key==='f')){
     e.preventDefault();
     setFac(!document.body.classList.contains('fac-on'));
   }
