@@ -190,7 +190,7 @@
 <!-- ============ STEP 0 · INTRO ============ -->
 <section class="step" id="s0">
   <h1>EveryweAR: Expert Session</h1>
-  <p class="sans" style="color:var(--muted);font-size:14px">Kit v3 · 2026-08-24 · this page is the screen-share surface for the whole session. Participant-facing text is ready to read aloud; the orange facilitator layer stays hidden unless toggled (press F while no text field is focused, or open a private window with <code>#fac</code>).</p>
+  <p class="sans" style="color:var(--muted);font-size:14px">This page is the screen-share surface for the whole session. Participant-facing text is ready to read aloud; the orange facilitator layer stays hidden unless toggled (press F while no text field is focused, or open a private window with <code>#fac</code>).</p>
 
   <div class="script"><span class="say">read aloud</span><br>
   Thank you for joining. We are studying how designers make interaction decisions for AR glasses that have no camera during use. Over the next 75 minutes you will design for one scenario, twice, with a short tutorial in between; then you will see five things we built and tell us where you disagree with our map. There are no right answers; we want your reasoning aloud. We record audio and this screen. Any questions before we start?</div>
@@ -225,7 +225,7 @@
 <section class="step" id="s1">
   <h2>Part 1 · Design for this hardware <span style="color:var(--muted);font-size:16px">(12 min)</span></h2>
   <div class="script"><span class="say">read aloud</span><br>
-  Here is the hardware and a brief. For each of the five needs, tell me what the user does, where the content lives, and what the system would need beyond the sensors that are worn. Think aloud; I will take notes as you go and read them back so you can correct me.</div>
+  Here is the hardware and a brief. For each of the five needs, type what the user does, where the content lives, and what the system would need beyond the sensors that are worn. Think aloud while you type; I will only ask questions.</div>
 
   <div class="card"><b>Hardware.</b> The user wears AR glasses with an inertial unit (accelerometer, gyroscope). No camera and no eye tracker during use. A watch on one wrist and a phone in one pocket may be worn. A single scan or setup step at the start of a session is allowed if you want it; say so explicitly.</div>
 
@@ -238,7 +238,7 @@
 
   <div class="card" id="briefcard"></div>
 
-  <h3>Notes <span style="color:var(--muted);font-size:14px">(facilitator types; expert corrects)</span></h3>
+  <h3>Your answers <span style="color:var(--muted);font-size:14px">(type in each box; short phrases are fine)</span></h3>
   <table class="rowtable" id="beforetable"></table>
 
   <div class="fac"><b>One follow-up only</b>, per need, when the content is placed somewhere: "What has to be known for it to stay there?" Do not mention frames, colors, fixes, or drift. If the expert asks what sensing is available, repeat the hardware statement verbatim. Leave a row blank rather than paraphrase beyond what was said.</div>
@@ -311,7 +311,7 @@
 <section class="step" id="s3">
   <h2>Part 2 · Your design, with the grid <span style="color:var(--muted);font-size:16px">(15 min)</span></h2>
   <div class="script"><span class="say">read aloud</span><br>
-  Here are your five answers from before, with the grid beside them. For each one: click the cell where the interaction lives, tell me whether it needs no fix, an occasional fix, or a setup or scan, and tell me whether you would now change the design, and why. The grid shows the color of the cell you picked; nothing here is marked right or wrong.</div>
+  Here are your five answers from before, with the grid beside them. For each one: click the cell where the interaction lives, pick whether it needs no fix, an occasional fix, or a setup or scan, and type whether you would now change the design, and why. An interaction may pass through more than one cell, for example content pinned to a machine that you then copy to your wrist: click the cells in the order they happen, and click a cell again to remove it. The grid shows the color of what you picked; nothing here is marked right or wrong.</div>
 
   <img class="grid-fig" src="everyweAR-Material/design-space-recolor.png" alt="The EveryweAR design space grid, five frames by three commitments, colored by the inertial frontier">
   <div class="legend">
@@ -336,7 +336,7 @@
 <section class="step" id="s4">
   <h2>What we built <span style="color:var(--muted);font-size:16px">(8 min)</span></h2>
   <div class="script"><span class="say">read aloud</span><br>
-  Five applications, all running live on glasses, watch, and phone, no camera during use. Each caption names the cells it occupies. After each one, tell me whether it is something you would have thought of. At the end: what is missing from this set?</div>
+  Five applications, all running live on glasses, watch, and phone, no camera during use. Each caption names the cells it occupies. After each one, tick whether it is something you would have thought of. At the end, type what is missing from this set.</div>
   <div id="demolist"></div>
   <div class="qa"><div class="q">What is missing from this set?</div>
     <textarea id="demo_missing" oninput="saveDemos()" placeholder="in the expert's words"></textarea></div>
@@ -347,7 +347,7 @@
 <section class="step" id="s5">
   <h2>The coloring <span style="color:var(--muted);font-size:16px">(17 min)</span></h2>
   <div class="script"><span class="say">read aloud</span><br>
-  Now the grid on its own. Tell me any cell whose color you disagree with, and why. Be specific about what would have to be sensed.</div>
+  Now the grid on its own. Click any cell whose color you disagree with and type why. Be specific about what would have to be sensed.</div>
   <img class="grid-fig" src="everyweAR-Material/design-space-recolor.png" alt="The EveryweAR design space grid, five frames by three commitments, colored by the inertial frontier">
 
   <div class="subnav"><span class="cardmeta">Click the cell in question, then type the objection and the quantity it points to.</span></div>
@@ -445,9 +445,14 @@ let closing = load(K.closing, {carry:'', ignore:''});
 let misc = load(K.misc, {warmfix:''});
 
 function blankBefore(){ return [0,1,2,3,4].map(()=>({act:'', where:'', beyond:''})); }
-function blankAfter(){ return [0,1,2,3,4].map(()=>({cell:null, call:'', changed:false, why:''})); }
+function blankAfter(){ return [0,1,2,3,4].map(()=>({cells:[], call:'', changed:false, why:''})); }
 if (!before) before = blankBefore();
 if (!after) after = blankAfter();
+after.forEach(a=>{ if(!a.cells) a.cells = a.cell ? [a.cell] : []; });
+const RANK = {blue:0, gradient:1, purple:2};
+function chainColor(cells){ if(!cells||!cells.length) return null; return cells.map(colorOf).sort((x,y)=>RANK[y]-RANK[x])[0]; }
+function chainExpected(cells){ const c = chainColor(cells); return c==='blue' ? 'none' : c==='gradient' ? 'occasional' : c==='purple' ? 'setup' : null; }
+function chainName(cells){ return (cells||[]).map(cellName).join(' → '); }
 
 /* ---------- helpers ---------- */
 function cellName(a){ return a ? `${FRAMES[a[0]]} × ${COMMITS[a[1]]}` : ''; }
@@ -469,6 +474,12 @@ function buildGridInto(id, pref, fn){
   g.innerHTML = h;
 }
 function buildGrid(){ buildGridInto('redogrid','rk','pickRedo'); buildGridInto('critgrid','ck','pickCrit'); }
+function markGridMany(pref, sels){
+  FRAMES.forEach((f,fi)=>COMMITS.forEach((cm,c)=>{
+    const el = document.getElementById(`${pref}${fi}_${c}`); if(!el) return;
+    el.classList.toggle('sel', !!(sels||[]).find(s=>s[0]===fi&&s[1]===c));
+  }));
+}
 function markGrid(pref, sel){
   FRAMES.forEach((f,fi)=>COMMITS.forEach((cm,c)=>{
     const el = document.getElementById(`${pref}${fi}_${c}`); if(!el) return;
@@ -533,20 +544,20 @@ function saveMisc(){ misc.warmfix = document.getElementById('warmfix').value; sa
 /* ---------- 1b ---------- */
 let redoRow = 0;
 function selectRow(i){ redoRow = i; renderRedo(); }
-function pickRedo(f,c){ after[redoRow].cell = [f,c]; save(K.after, after); renderRedo(); }
+function pickRedo(f,c){ const cs = after[redoRow].cells; const i = cs.findIndex(x=>x[0]===f&&x[1]===c); if(i>=0) cs.splice(i,1); else cs.push([f,c]); save(K.after, after); renderRedo(); }
 function setAfter(i, k, v){ after[i][k] = v; save(K.after, after); renderRedo(false); }
 function renderRedo(full=true){
-  markGrid('rk', after[redoRow].cell);
+  markGridMany('rk', after[redoRow].cells);
   const list = document.getElementById('redolist'); if (!list) return;
   const b = currentBrief();
   if (full) {
     list.innerHTML = NEEDS[b].map((n,i)=>{
       const a = after[i], bf = before[i];
-      const col = colorOf(a.cell);
+      const col = chainColor(a.cells);
       return `<div class="redo ${i===redoRow?'open':''}" onclick="if(event.target.tagName!=='TEXTAREA'&&event.target.tagName!=='INPUT'&&event.target.tagName!=='LABEL')selectRow(${i})">
         <div class="need">${i+1} · ${n}</div>
         <div class="meta">${bf.act?'<b>does:</b> '+esc(bf.act)+' · ':''}${bf.where?'<b>lives:</b> '+esc(bf.where)+' · ':''}${bf.beyond?'<b>beyond:</b> '+esc(bf.beyond):''}${(!bf.act&&!bf.where&&!bf.beyond)?'(no notes from Part 1)':''}</div>
-        <div class="cellline"><span class="swatch ${col?'sw-'+col:'sw-none'}"></span>${a.cell ? cellName(a.cell) : '<span style="color:var(--muted)">no cell yet: select this row, then click the grid</span>'}</div>
+        <div class="cellline"><span class="swatch ${col?'sw-'+col:'sw-none'}"></span>${a.cells.length ? chainName(a.cells) : '<span style="color:var(--muted)">no cell yet: select this row, then click the grid</span>'}</div>
         <div class="fields">
           <div class="radios"><div style="color:var(--muted);margin-bottom:2px">fix call</div>
             <label><input type="radio" name="call${i}" value="none" ${a.call==='none'?'checked':''} onchange="setAfter(${i},'call','none')"> none</label>
@@ -562,7 +573,7 @@ function renderRedo(full=true){
     }).join('');
   } else {
     document.querySelectorAll('#redolist .redo').forEach((el,i)=>{
-      const sw = el.querySelector('.swatch'); const col = colorOf(after[i].cell);
+      const sw = el.querySelector('.swatch'); const col = chainColor(after[i].cells);
       sw.className = 'swatch ' + (col?'sw-'+col:'sw-none');
     });
   }
@@ -572,12 +583,12 @@ function renderRedoLog(){
   const log = document.getElementById('redolog'); if (!log) return;
   const b = currentBrief();
   const rows = NEEDS[b].map((n,i)=>{
-    const a = after[i]; const exp = expectedCall(a.cell);
-    const ok = a.cell && a.call ? (a.call===exp ? '✓' : '✗ probe') : '';
-    return `<tr><th>${i+1}</th><td>${a.cell?cellName(a.cell):''}</td><td>${a.call||''}</td><td>${exp||''}</td><td>${ok}</td><td>${a.changed?'yes':''}</td></tr>`;
+    const a = after[i]; const exp = chainExpected(a.cells);
+    const ok = a.cells.length && a.call ? (a.call===exp ? '✓' : '✗ probe') : '';
+    return `<tr><th>${i+1}</th><td>${chainName(a.cells)}</td><td>${a.call||''}</td><td>${exp||''}</td><td>${ok}</td><td>${a.changed?'yes':''}</td></tr>`;
   }).join('');
-  const scored = after.filter(a=>a.cell&&a.call);
-  const match = scored.filter(a=>a.call===expectedCall(a.cell)).length;
+  const scored = after.filter(a=>a.cells.length&&a.call);
+  const match = scored.filter(a=>a.call===chainExpected(a.cells)).length;
   log.innerHTML = `<b>Facilitator log (expected call by color; export carries the same):</b>
     <table><tr><th>#</th><th>cell</th><th>expert call</th><th>expected</th><th>match</th><th>changed</th></tr>${rows}</table>
     match ${match}/${scored.length} · changed ${after.filter(a=>a.changed).length}/5`;
@@ -650,8 +661,8 @@ function exportSession(){
     demographics: { id: demo.id||'', role: demo.role||'', years: demo.years||'', focus: demo.focus||'', fam: demo.fam||'', fmt: demo.fmt||'' },
     brief: b,
     before: NEEDS[b].map((n,i)=>({ need:n, act:before[i].act||'', where:before[i].where||'', beyond:before[i].beyond||'' })),
-    after: NEEDS[b].map((n,i)=>({ need:n, cell: after[i].cell ? cellName(after[i].cell) : '', call: after[i].call||'',
-      expected: expectedCall(after[i].cell) || '', changed: !!after[i].changed, why: after[i].why||'' })),
+    after: NEEDS[b].map((n,i)=>({ need:n, cell: after[i].cells.length ? cellName(after[i].cells[0]) : '', cells: after[i].cells.map(cellName), call: after[i].call||'',
+      expected: chainExpected(after[i].cells) || '', changed: !!after[i].changed, why: after[i].why||'' })),
     afterReflection: { unprompted: afterRefl.unprompted||'', likert: afterRefl.likert||null },
     demos: { thoughtOf: demos.thoughtOf.slice(), missing: demos.missing||'' },
     critique: { cells: crit.cells.map(c=>({cell:c.cell, objection:c.objection||'', quantity:c.quantity||''})),
