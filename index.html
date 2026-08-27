@@ -200,7 +200,7 @@
 
   <h3>Background <span style="color:var(--muted);font-size:14px">(for our records, one minute)</span></h3>
   <div class="form">
-    <div><label>Participant</label><select id="df_id" onchange="saveDemo()">
+    <div><label>Participant <span style="color:var(--muted);font-weight:400">(preset for this session)</span></label><select id="df_id" onchange="saveDemo()">
       <option value="">select</option><option>PILOT</option><option>E1</option><option>E2</option><option>E3</option><option>E4</option>
       <option>E5</option><option>E6</option><option>E7</option><option>E8</option><option>E9</option><option>E10</option></select></div>
     <div><label>Role</label><select id="df_role" onchange="saveDemo()">
@@ -213,6 +213,7 @@
       <option value="">select</option><option>remote</option><option>in person</option></select></div>
   </div>
   <div class="fac" id="briefwarn"></div>
+  <div class="fac" id="sessioncfg"></div>
 
   <div class="fac"><b>Before the session.</b> Consent signed · recording ON (audio + screen) · fill the background form now. IRB: <b>STU00226775, exempt</b> · $50 Tango after session · 75 min target. Start the clock (top right) at consent.
   <table>
@@ -355,28 +356,40 @@
 <section class="step" id="s5">
   <h2>Part 3 · An application of your own <span style="color:var(--muted);font-size:16px">(8 min)</span></h2>
   <div class="script"><span class="say">read aloud</span><br>
-  Same hardware: glasses with an inertial unit, no camera and no eye tracker during use, watch and phone optional, one setup step allowed. Pick an application from your own domain. Name it, then list three to five interactions. For each: type what the user does, click the cell or cells it passes through, and say what it needs beyond the worn sensors (none, an occasional fix, or a one-time setup or scan). Think aloud while you build.</div>
+  Same hardware: glasses with an inertial unit, no camera and no eye tracker during use, watch and phone optional, one setup step allowed. Pick an application from your own domain and name it. Then we add three to five interactions <b>one at a time</b>: press "add an interaction", type what the user does, click the cell or cells it passes through, say what it needs beyond the worn sensors, and save it. It appears in the table, and we start the next one. Think aloud while you build.</div>
 
   <div class="qa"><div class="q">Application name and domain</div>
     <input id="fr_name" oninput="saveFreeMeta()" placeholder="e.g. museum guide for families" style="width:100%"></div>
 
   <img class="grid-fig" src="everyweAR-Material/design-space-recolor.png" alt="The EveryweAR design space grid, five frames by three commitments, colored by the inertial frontier">
-  <div class="subnav"><span class="cardmeta">Type the interaction, click its cells in order (click again to remove), pick the fix call, then add it.</span></div>
-  <div class="qa"><div class="q">Interaction</div><textarea id="fr_item" placeholder="what the user does and what the content is"></textarea></div>
-  <div class="pickgrid small" id="freegrid"></div>
-  <div class="subnav">
-    <span class="cardmeta" id="freestate">no cell yet</span>
-    <span class="radios" style="margin-left:12px">
-      <label><input type="radio" name="frcall" value="none"> none: worn sensors alone</label>
-      <label><input type="radio" name="frcall" value="occasional"> occasional fix: re-register position now and then</label>
-      <label><input type="radio" name="frcall" value="setup"> setup or scan: scan once or share a common start</label>
-    </span>
-    <span class="spacer"></span>
-    <button class="primary" onclick="addFree()">add interaction</button>
-  </div>
+
   <table class="rowtable" id="freetable"></table>
 
-  <div class="fac"><b>Ask, do not suggest:</b> "what has to be known for that to work?" once per interaction if the cell and the fix call disagree; take the answer down in the why box. Aim for 3 to 5 interactions; stop at 8 minutes.</div>
+  <div class="subnav" id="fr_addrow">
+    <button class="primary" id="fr_addbtn" onclick="openFree()">+ add an interaction</button>
+    <span class="cardmeta" style="margin-left:10px">one interaction per entry; each gets its own cells and its own fix call</span>
+  </div>
+
+  <div id="fr_editor" style="display:none">
+    <div class="card" style="border-left:4px solid var(--ink)"><b>Interaction <span id="fr_num">1</span> of this application.</b>
+      Type what the user does, click its cell or cells on the grid below (click again to remove), pick the fix call, then save it.</div>
+    <div class="qa"><div class="q">Interaction</div><textarea id="fr_item" placeholder="what the user does and what the content is"></textarea></div>
+    <div class="pickgrid small" id="freegrid"></div>
+    <div class="subnav">
+      <span class="cardmeta" id="freestate">no cell yet</span>
+      <span class="radios" style="margin-left:12px">
+        <label><input type="radio" name="frcall" value="none"> none: worn sensors alone</label>
+        <label><input type="radio" name="frcall" value="occasional"> occasional fix: re-register position now and then</label>
+        <label><input type="radio" name="frcall" value="setup"> setup or scan: scan once or share a common start</label>
+      </span>
+      <span class="spacer"></span>
+      <button onclick="discardFree()">discard</button>
+      <button class="primary" onclick="addFree()">save this interaction</button>
+    </div>
+  </div>
+
+  <div class="fac"><b>Ask, do not suggest:</b> "what has to be known for that to work?" once per interaction if the cell and the fix call disagree; take the answer down in the why box. Aim for 3 to 5 interactions; stop at 8 minutes.
+  <br><b>Nothing is stored until "save this interaction" is pressed</b> — an open editor with cells lit is not in the export. Export refuses to run while one is open.</div>
 </section>
 
 <!-- ============ STEP 6 · FRONTIER CRITIQUE ============ -->
@@ -467,10 +480,17 @@ const K = {
   afterRefl:'ewar3_afterReflection', demos:'ewar3_demos', crit:'ewar3_critique',
   closing:'ewar3_closing', misc:'ewar3_misc', free:'ewar3_free'
 };
+/* ---------- PRE-SESSION SETUP: edit these two lines before each session ----------
+   The participant never picks an id or a brief; the facilitator sets them here.
+   brief: 'A' = gym training companion, 'B' = warehouse picking assistant.
+   Protocol alternates: odd id = A, even id = B. ------------------------------- */
+const SESSION = { id: 'E2', brief: 'B' };
+
 function load(k, d){ try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch(e){ return d; } }
 function save(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} }
 
 let demo = load(K.demo, {});
+if (!demo.id) { demo.id = SESSION.id; save(K.demo, demo); }
 let brief = load(K.brief, null);
 let before = load(K.before, null);        // [{act, where, beyond}] x5
 let after = load(K.after, null);          // [{cell:[f,c]|null, call:'', changed:false, why:''}] x5
@@ -531,15 +551,22 @@ function saveDemo(){
   demo = d; save(K.demo, d);
   if (brief && defaultBrief() !== brief) {
     const w = document.getElementById('briefwarn');
-    if (w) w.textContent = `Brief ${brief} is locked from the first 1a render; id ${demo.id} would default to ${defaultBrief()}. Override on the 1a page if that is intended.`;
+    if (w) w.textContent = `Brief ${brief} is locked from the first 1a render, but this session is configured for brief ${defaultBrief()} (SESSION at the top of the script). Override on the 1a page if that is intended.`;
   } else { const w = document.getElementById('briefwarn'); if (w) w.textContent = ''; }
+}
+function renderSessionCfg(){
+  const el = document.getElementById('sessioncfg'); if (!el) return;
+  el.innerHTML = `<b>This session is configured as ${SESSION.id}, brief ${SESSION.brief} `
+    + `(${SESSION.brief === 'A' ? 'gym training companion' : 'warehouse picking assistant'}).</b> `
+    + `Set both in <code>const SESSION</code> at the top of the script before the next session; the participant is never asked to choose. `
+    + `Protocol parity for ${SESSION.id} would be brief ${parityBrief()}.`;
 }
 function loadDemo(){
   DFIELDS.forEach(k => { const el = document.getElementById(k); if (el && demo[k.slice(3)] !== undefined) el.value = demo[k.slice(3)]; });
 }
-function defaultBrief(){
-  const id = (demo.id || '');
-  const m = id.match(/(\d+)/);
+function defaultBrief(){ return SESSION.brief === 'B' ? 'B' : 'A'; }
+function parityBrief(){
+  const m = (demo.id || '').match(/(\d+)/);
   if (!m) return 'A';
   return (+m[1]) % 2 === 1 ? 'A' : 'B';
 }
@@ -552,7 +579,7 @@ function renderBrief(){
   const b = brief;
   document.querySelectorAll('input[name=brief]').forEach(r => r.checked = (r.value === b));
   const st = document.getElementById('briefstate');
-  if (st) st.textContent = `brief ${b} (locked at first 1a render from id ${demo.id || 'unset'}; click to override, 1a notes stay in place)`;
+  if (st) st.textContent = `brief ${b} for ${demo.id || 'unset'} (preset in SESSION; parity would give ${parityBrief()}; click to override, 1a notes stay in place)`;
   const card = document.getElementById('briefcard');
   if (card) card.innerHTML = BRIEFTEXT[b] + '<ol>' + NEEDS[b].map(n=>`<li>${n}</li>`).join('') + '</ol>';
   renderBefore();
@@ -661,19 +688,42 @@ function saveDemos(){ demos.missing = document.getElementById('demo_missing').va
 
 /* ---------- free application design ---------- */
 let freeSel = [];
+let freeOpen = false;
 function pickFree(f,c){ const i = freeSel.findIndex(x=>x[0]===f&&x[1]===c); if(i>=0) freeSel.splice(i,1); else freeSel.push([f,c]);
   markGridMany('fk', freeSel); document.getElementById('freestate').textContent = freeSel.length ? chainName(freeSel) : 'no cell yet'; }
 function saveFreeMeta(){ free.name = document.getElementById('fr_name').value; save(K.free, free); }
+function openFree(){ freeOpen = true; renderFreeEditor(); const el = document.getElementById('fr_item'); if (el) el.focus(); }
+function clearFreeEditor(){
+  freeSel = []; markGridMany('fk', []);
+  const el = document.getElementById('fr_item'); if (el) el.value = '';
+  document.querySelectorAll('input[name="frcall"]').forEach(r=>r.checked=false);
+}
+function discardFree(){
+  if (hasPendingFree() && !confirm('Discard this interaction? The typed text and the lit cells are not saved anywhere.')) return;
+  clearFreeEditor(); freeOpen = false; renderFreeEditor();
+}
+function hasPendingFree(){
+  const el = document.getElementById('fr_item');
+  return freeOpen && (freeSel.length > 0 || !!(el && el.value.trim()));
+}
+function renderFreeEditor(){
+  const ed = document.getElementById('fr_editor'), row = document.getElementById('fr_addrow'), btn = document.getElementById('fr_addbtn');
+  if (!ed || !row || !btn) return;
+  ed.style.display = freeOpen ? 'block' : 'none';
+  row.style.display = freeOpen ? 'none' : 'flex';
+  btn.textContent = free.items.length ? '+ add another interaction' : '+ add an interaction';
+  const num = document.getElementById('fr_num'); if (num) num.textContent = free.items.length + 1;
+  const st = document.getElementById('freestate'); if (st) st.textContent = freeSel.length ? chainName(freeSel) : 'no cell yet';
+}
 function addFree(){
   const txt = document.getElementById('fr_item').value.trim();
   const call = (document.querySelector('input[name="frcall"]:checked')||{}).value || '';
   if (!txt) { document.getElementById('freestate').textContent = 'type the interaction first'; return; }
   if (!freeSel.length) { document.getElementById('freestate').textContent = 'click at least one cell'; return; }
   free.items.push({interaction:txt, cells:freeSel.slice(), call, why:''});
-  freeSel = []; markGridMany('fk', []); document.getElementById('fr_item').value = '';
-  document.querySelectorAll('input[name="frcall"]').forEach(r=>r.checked=false);
-  document.getElementById('freestate').textContent = 'no cell yet';
-  save(K.free, free); renderFree();
+  clearFreeEditor();
+  freeOpen = false;
+  save(K.free, free); renderFree(); renderFreeEditor();
 }
 function setFree(i,k,v){ free.items[i][k] = v; save(K.free, free); }
 function rmFree(i){ free.items.splice(i,1); save(K.free, free); renderFree(); }
@@ -760,6 +810,10 @@ function loadCritOpen(){ CROPEN.forEach(k => { const el = document.getElementByI
 function saveClosing(){ closing.carry = document.getElementById('cl_carry').value; closing.ignore = document.getElementById('cl_ignore').value; save(K.closing, closing); }
 function loadClosing(){ document.getElementById('cl_carry').value = closing.carry || ''; document.getElementById('cl_ignore').value = closing.ignore || ''; }
 function exportSession(){
+  if (hasPendingFree()) {
+    alert('Part 3 has an interaction still open: cells are lit or text is typed, but it was never saved into the table, so it is NOT in the export. Press "save this interaction" (or "discard") first.');
+    go(5); return;
+  }
   const b = currentBrief();
   const data = {
     kitVersion: 'v3',
@@ -796,6 +850,7 @@ function clearSession(){
   crit = {cells:[], noPlace:'', mostUseful:'', leastUseful:'', rename:''}; closing = {carry:'', ignore:''}; misc = {warmfix:''}; free = {name:'', items:[]}; freeSel = [];
   redoRow = 0; critSel = null; tp = 0;
   DFIELDS.forEach(k => { const el = document.getElementById(k); if (el) el.value = ''; });
+  demo.id = SESSION.id; save(K.demo, demo); freeOpen = false;
   document.getElementById('sessjson').style.display = 'none'; document.getElementById('exportstate').textContent = '';
   go(0);
 }
@@ -812,12 +867,12 @@ function render() {
   nav.innerHTML = (cur>0?`<button onclick="go(${cur-1})">◀ back</button>`:'') +
     (cur<STEPS.length-1?`<button class="primary" onclick="go(${cur+1})">continue ▶</button>`:'');
   document.getElementById('s'+cur).appendChild(nav);
-  if (cur===0) loadDemo();
+  if (cur===0) { loadDemo(); renderSessionCfg(); }
   if (cur===1) renderBrief();
   if (cur===2) { tpage(tp); document.getElementById('warmfix').value = misc.warmfix || ''; }
   if (cur===3) { renderRedo(); renderLikert(); }
   if (cur===4) renderDemos();
-  if (cur===5) { markGridMany('fk', freeSel); renderFree(); }
+  if (cur===5) { markGridMany('fk', freeSel); renderFree(); renderFreeEditor(); }
   if (cur===6) { markGrid('ck', critSel); renderCrit(); loadCritOpen(); }
   if (cur===7) loadClosing();
 }
