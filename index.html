@@ -373,14 +373,14 @@
   <div id="fr_editor" style="display:none">
     <div class="card" style="border-left:4px solid var(--ink)"><b>Interaction <span id="fr_num">1</span> of this application.</b>
       Type what the user does, click its cell or cells on the grid below (click again to remove), pick the fix call, then save it.</div>
-    <div class="qa"><div class="q">Interaction</div><textarea id="fr_item" placeholder="what the user does and what the content is"></textarea></div>
+    <div class="qa"><div class="q">Interaction</div><textarea id="fr_item" oninput="saveFreePending()" placeholder="what the user does and what the content is"></textarea></div>
     <div class="pickgrid small" id="freegrid"></div>
     <div class="subnav">
       <span class="cardmeta" id="freestate">no cell yet</span>
       <span class="radios" style="margin-left:12px">
-        <label><input type="radio" name="frcall" value="none"> none: worn sensors alone</label>
-        <label><input type="radio" name="frcall" value="occasional"> occasional fix: re-register position now and then</label>
-        <label><input type="radio" name="frcall" value="setup"> setup or scan: scan once or share a common start</label>
+        <label><input type="radio" name="frcall" value="none" onchange="saveFreePending()"> none: worn sensors alone</label>
+        <label><input type="radio" name="frcall" value="occasional" onchange="saveFreePending()"> occasional fix: re-register position now and then</label>
+        <label><input type="radio" name="frcall" value="setup" onchange="saveFreePending()"> setup or scan: scan once or share a common start</label>
       </span>
       <span class="spacer"></span>
       <button onclick="discardFree()">discard</button>
@@ -478,7 +478,7 @@ const DEMOS = [
 const K = {
   demo:'ewar3_demo', brief:'ewar3_brief', before:'ewar3_before', after:'ewar3_after',
   afterRefl:'ewar3_afterReflection', demos:'ewar3_demos', crit:'ewar3_critique',
-  closing:'ewar3_closing', misc:'ewar3_misc', free:'ewar3_free'
+  closing:'ewar3_closing', misc:'ewar3_misc', free:'ewar3_free', freePending:'ewar3_freepending'
 };
 /* ---------- PRE-SESSION SETUP: edit these two lines before each session ----------
    The participant never picks an id or a brief; the facilitator sets them here.
@@ -689,10 +689,25 @@ function saveDemos(){ demos.missing = document.getElementById('demo_missing').va
 /* ---------- free application design ---------- */
 let freeSel = [];
 let freeOpen = false;
+let freeRestored = false;
+/* the Part 3 editor autosaves its pending entry: a page reload during the session
+   must not take the typed interaction, the lit cells or the fix call with it. */
+function saveFreePending(){
+  const el = document.getElementById('fr_item');
+  const call = (document.querySelector('input[name="frcall"]:checked')||{}).value || '';
+  save(K.freePending, {open:freeOpen, text: el ? el.value : '', cells: freeSel, call});
+}
+function restoreFreePending(){
+  const st = load(K.freePending, null); if (!st) return;
+  freeOpen = !!st.open; freeSel = (st.cells || []).slice();
+  const el = document.getElementById('fr_item'); if (el) el.value = st.text || '';
+  if (st.call) { const r = document.querySelector('input[name="frcall"][value="' + st.call + '"]'); if (r) r.checked = true; }
+}
 function pickFree(f,c){ const i = freeSel.findIndex(x=>x[0]===f&&x[1]===c); if(i>=0) freeSel.splice(i,1); else freeSel.push([f,c]);
-  markGridMany('fk', freeSel); document.getElementById('freestate').textContent = freeSel.length ? chainName(freeSel) : 'no cell yet'; }
+  markGridMany('fk', freeSel); document.getElementById('freestate').textContent = freeSel.length ? chainName(freeSel) : 'no cell yet';
+  saveFreePending(); }
 function saveFreeMeta(){ free.name = document.getElementById('fr_name').value; save(K.free, free); }
-function openFree(){ freeOpen = true; renderFreeEditor(); const el = document.getElementById('fr_item'); if (el) el.focus(); }
+function openFree(){ freeOpen = true; renderFreeEditor(); saveFreePending(); const el = document.getElementById('fr_item'); if (el) el.focus(); }
 function clearFreeEditor(){
   freeSel = []; markGridMany('fk', []);
   const el = document.getElementById('fr_item'); if (el) el.value = '';
@@ -700,7 +715,7 @@ function clearFreeEditor(){
 }
 function discardFree(){
   if (hasPendingFree() && !confirm('Discard this interaction? The typed text and the lit cells are not saved anywhere.')) return;
-  clearFreeEditor(); freeOpen = false; renderFreeEditor();
+  clearFreeEditor(); freeOpen = false; renderFreeEditor(); saveFreePending();
 }
 function hasPendingFree(){
   const el = document.getElementById('fr_item');
@@ -723,7 +738,7 @@ function addFree(){
   free.items.push({interaction:txt, cells:freeSel.slice(), call, why:''});
   clearFreeEditor();
   freeOpen = false;
-  save(K.free, free); renderFree(); renderFreeEditor();
+  save(K.free, free); renderFree(); renderFreeEditor(); saveFreePending();
 }
 function setFree(i,k,v){ free.items[i][k] = v; save(K.free, free); }
 function rmFree(i){ free.items.splice(i,1); save(K.free, free); renderFree(); }
@@ -850,7 +865,7 @@ function clearSession(){
   crit = {cells:[], noPlace:'', mostUseful:'', leastUseful:'', rename:''}; closing = {carry:'', ignore:''}; misc = {warmfix:''}; free = {name:'', items:[]}; freeSel = [];
   redoRow = 0; critSel = null; tp = 0;
   DFIELDS.forEach(k => { const el = document.getElementById(k); if (el) el.value = ''; });
-  demo.id = SESSION.id; save(K.demo, demo); freeOpen = false;
+  demo.id = SESSION.id; save(K.demo, demo); freeOpen = false; freeRestored = true; saveFreePending();
   document.getElementById('sessjson').style.display = 'none'; document.getElementById('exportstate').textContent = '';
   go(0);
 }
@@ -872,7 +887,7 @@ function render() {
   if (cur===2) { tpage(tp); document.getElementById('warmfix').value = misc.warmfix || ''; }
   if (cur===3) { renderRedo(); renderLikert(); }
   if (cur===4) renderDemos();
-  if (cur===5) { markGridMany('fk', freeSel); renderFree(); renderFreeEditor(); }
+  if (cur===5) { if (!freeRestored) { restoreFreePending(); freeRestored = true; } markGridMany('fk', freeSel); renderFree(); renderFreeEditor(); }
   if (cur===6) { markGrid('ck', critSel); renderCrit(); loadCritOpen(); }
   if (cur===7) loadClosing();
 }
