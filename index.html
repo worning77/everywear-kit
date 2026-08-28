@@ -491,7 +491,10 @@ function save(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e
 
 let demo = load(K.demo, {});
 if (!demo.id) { demo.id = SESSION.id; save(K.demo, demo); }
-let brief = load(K.brief, null);
+/* the stored brief is stamped with the participant it was chosen for: a brief left
+   behind by the previous session must not survive a change of SESSION.id */
+let briefRec = load(K.brief, null);
+let brief = (briefRec && typeof briefRec === 'object' && briefRec.id === SESSION.id) ? briefRec.v : null;
 let before = load(K.before, null);        // [{act, where, beyond}] x5
 let after = load(K.after, null);          // [{cell:[f,c]|null, call:'', changed:false, why:''}] x5
 let afterRefl = load(K.afterRefl, {unprompted:'', likert:null});
@@ -554,8 +557,19 @@ function saveDemo(){
     if (w) w.textContent = `Brief ${brief} is locked from the first 1a render, but this session is configured for brief ${defaultBrief()} (SESSION at the top of the script). Override on the 1a page if that is intended.`;
   } else { const w = document.getElementById('briefwarn'); if (w) w.textContent = ''; }
 }
+function staleSession(){
+  const stored = (load(K.demo, {}) || {}).id;
+  return stored && stored !== SESSION.id ? stored : null;
+}
 function renderSessionCfg(){
   const el = document.getElementById('sessioncfg'); if (!el) return;
+  const stale = staleSession();
+  if (stale) {
+    el.innerHTML = `<b style="color:#b00">This browser still holds ${stale}'s session, but the kit is configured for ${SESSION.id}.</b> `
+      + `Their answers, and their brief, are still in local storage and will be carried into this session. `
+      + `Export ${stale} if that has not been done, then press <b>clear all</b> on the closing page before starting.`;
+    return;
+  }
   el.innerHTML = `<b>This session is configured as ${SESSION.id}, brief ${SESSION.brief} `
     + `(${SESSION.brief === 'A' ? 'gym training companion' : 'warehouse picking assistant'}).</b> `
     + `Set both in <code>const SESSION</code> at the top of the script before the next session; the participant is never asked to choose. `
@@ -573,9 +587,9 @@ function parityBrief(){
 function applyDefaultBrief(){ renderBrief(); }
 
 /* ---------- 1a ---------- */
-function setBrief(x){ brief = x; save(K.brief, x); renderBrief(); }
+function setBrief(x){ brief = x; save(K.brief, {v:x, id:SESSION.id}); renderBrief(); }
 function renderBrief(){
-  if (!brief) { brief = defaultBrief(); save(K.brief, brief); }
+  if (!brief) { brief = defaultBrief(); save(K.brief, {v:brief, id:SESSION.id}); }
   const b = brief;
   document.querySelectorAll('input[name=brief]').forEach(r => r.checked = (r.value === b));
   const st = document.getElementById('briefstate');
